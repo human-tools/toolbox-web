@@ -24,3 +24,5 @@ yarn-error.log*
 
 # Tailwind CSS generated files.
 /src/assets/main.generated.css
+# Hack around pdf.js worker file not loading well with esmodules.
+/src/pdfjs.worker.min.json

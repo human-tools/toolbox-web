@@ -1,165 +1,55 @@
-import React from 'react';
+import * as React from 'react';
+import CombinePDF from './CombinePDF/CombinePDF';
+import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
+import workerContent from './pdfjs.worker.min.json';
+import { GlobalWorkerOptions } from 'pdfjs-dist';
 
-function App(): JSX.Element {
+const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
+const workerBlobURL = URL.createObjectURL(workerBlob);
+GlobalWorkerOptions.workerSrc = workerBlobURL;
+
+export const App = (): JSX.Element => {
   return (
-    <div className="max-w-xl mx-auto py-12 md:max-w-4xl">
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div className="grid grid-cols-1 gap-6">
-          <label className="block">
-            <span className="text-gray-700">Input (text)</span>
-            <input
-              type="text"
-              className="mt-1 block w-full"
-              placeholder="john@example.com"
-            />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (email)</span>
-            <input
-              type="email"
-              className="mt-1 block w-full"
-              placeholder="john@example.com"
-            />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (email, multiple)</span>
-            <input
-              type="email"
-              multiple
-              className="mt-1 block w-full"
-              placeholder="john@example.com"
-            />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (password)</span>
-            <input
-              type="password"
-              className="mt-1 block w-full"
-              placeholder="john@example.com"
-            />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (date)</span>
-            <input type="date" className="mt-1 block w-full" />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (datetime-local)</span>
-            <input type="datetime-local" className="mt-1 block w-full" />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (month)</span>
-            <input type="month" className="mt-1 block w-full" />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (number)</span>
-            <input type="number" className="mt-1 block w-full" />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (search)</span>
-            <input type="search" className="mt-1 block w-full" />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (time)</span>
-            <input type="time" className="mt-1 block w-full" />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (week)</span>
-            <input type="week" className="mt-1 block w-full" />
-          </label>
-        </div>
-        <div className="grid grid-cols-1 gap-6">
-          <label className="block">
-            <span className="text-gray-700">Input (tel)</span>
-            <input
-              type="tel"
-              multiple
-              className="mt-1 block w-full"
-              placeholder="john@example.com"
-            />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Input (url)</span>
-            <input
-              type="url"
-              multiple
-              className="mt-1 block w-full"
-              placeholder="john@example.com"
-            />
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Select</span>
-            <select className="block w-full mt-1">
-              <option>Option 1</option>
-              <option>Option 2</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Select (multiple)</span>
-            <select className="block w-full mt-1">
-              <option>Option 1</option>
-              <option>Option 2</option>
-              <option>Option 3</option>
-              <option>Option 4</option>
-              <option>Option 5</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-gray-700">Textarea</span>
-            <textarea
-              className="mt-1 block w-full h-24"
-              placeholder="Enter some long form content."
-            ></textarea>
-          </label>
-          <div className="block">
-            <span className="text-gray-700">Checkboxes</span>
-            <div className="mt-2">
-              <div>
-                <label className="inline-flex items-center">
-                  <input type="checkbox" checked />
-                  <span className="ml-2">Option 1</span>
-                </label>
+    <Router>
+      <div className="bg-yellow-100 h-screen">
+        <div className="grid grid-cols-12">
+          <div className="col-span-3 p-4 pr-0">
+            <div className="flex flex-col space-y-2">
+              <div className="px-3 py-2 bg-white shadow-md rounded">
+                <Link to="/">Home</Link>
               </div>
-              <div>
-                <label className="inline-flex items-center">
-                  <input type="checkbox" />
-                  <span className="ml-2">Option 2</span>
-                </label>
+              <div className="px-3 py-2 bg-white shadow-md rounded">
+                <Link to="/combine-pdf">Combine PDF</Link>
               </div>
-              <div>
-                <label className="inline-flex items-center">
-                  <input type="checkbox" />
-                  <span className="ml-2">Option 3</span>
-                </label>
+              <div className="px-3 py-2 bg-white shadow-md rounded">
+                <Link to="/split-pdf">Split PDF</Link>
               </div>
             </div>
           </div>
-          <div className="block">
-            <span className="text-gray-700">Radio Buttons</span>
-            <div className="mt-2">
-              <div>
-                <label className="inline-flex items-center">
-                  <input type="radio" checked name="radio-direct" value="1" />
-                  <span className="ml-2">Option 1</span>
-                </label>
-              </div>
-              <div>
-                <label className="inline-flex items-center">
-                  <input type="radio" name="radio-direct" value="2" />
-                  <span className="ml-2">Option 2</span>
-                </label>
-              </div>
-              <div>
-                <label className="inline-flex items-center">
-                  <input type="radio" name="radio-direct" value="3" />
-                  <span className="ml-2">Option 3</span>
-                </label>
-              </div>
+          <div className="col-span-9 p-4 h-screen">
+            <div className="bg-white h-full p-4 shadow-md rounded">
+              <Switch>
+                <Route path="/" exact>
+                  <div>
+                    <h1>Home</h1>
+                  </div>
+                </Route>
+                <Route path="/combine-pdf" exact>
+                  <CombinePDF />
+                </Route>
+                <Route path="/split-pdf" exact>
+                  <div>
+                    <h1>Split PDF</h1>
+                    <p>TODO</p>
+                  </div>
+                </Route>
+              </Switch>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Router>
   );
-}
+};
 
 export default App;

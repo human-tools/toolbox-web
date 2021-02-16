@@ -4,19 +4,25 @@
   "private": true,
   "dependencies": {
     "@tailwindcss/forms": "^0.2.1",
+    "file-saver": "^2.0.5",
+    "pdf-lib": "^1.16.0",
+    "pdfjs-dist": "^2.6.347",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-dropzone": "^11.3.1",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.2",
     "tailwindcss": "^2.0.3",
     "typescript": "^4.1.5",
     "web-vitals": "^1.1.0"
   },
   "scripts": {
-    "start": "npm run watch:css && react-scripts start",
-    "build": "npm run watch:css && react-scripts build",
+    "start": "BUILD_TARGET=dev npm run watch:css && npm run updatepdfjsworker && react-scripts start",
+    "build": "npm run watch:css && npm run updatepdfjsworker && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "watch:css": "postcss src/assets/tailwind.css -o src/assets/main.generated.css"
+    "watch:css": "postcss src/assets/tailwind.css -o src/assets/main.generated.css",
+    "updatepdfjsworker": "node ./update-pdfjs-worker.mjs"
   },
   "eslintConfig": {
     "extends": [
@@ -43,6 +49,9 @@
     "@testing-library/user-event": "^12.7.1",
     "@types/jest": "^26.0.20",
     "@types/node": "^12.20.1",
+    "@types/pdfjs-dist": "^2.1.7",
+    "@types/file-saver": "^2.0.1",
+    "@types/react-router-dom": "^5.1.7",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
     "@typescript-eslint/eslint-plugin": "^4.15.1",
@@ -51,6 +60,7 @@
     "eslint": "^7.20.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "husky": "^5.0.9",
     "lint-staged": "^10.5.4",
     "postcss": "^8.2.6",

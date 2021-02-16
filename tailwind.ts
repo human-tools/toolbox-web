@@ -765,6 +765,7 @@ module.exports = {
       'focus-within',
       'hover',
       'focus',
+      'disabled',
     ],
     backgroundImage: ['responsive'],
     backgroundOpacity: [
@@ -802,8 +803,8 @@ module.exports = {
     boxSizing: ['responsive'],
     clear: ['responsive'],
     container: ['responsive'],
-    cursor: ['responsive'],
-    display: ['responsive'],
+    cursor: ['responsive', 'hover', 'group-hover', 'disabled'],
+    display: ['responsive', 'group-hover'],
     divideColor: ['responsive', 'dark'],
     divideOpacity: ['responsive', 'dark'],
     divideStyle: ['responsive'],
