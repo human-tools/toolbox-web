@@ -59,7 +59,7 @@ const CombinePDF = (): JSX.Element => {
         {...getRootProps()}
         className="p-10 bg-blue-100 rounded text-center text-blue-900 text-xl flex-grow-0 hover:bg-blue-900 hover:text-white hover:cursor-pointer "
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} accept=".pdf" />
         {isDragActive ? (
           <p>Drop the files here ...</p>
         ) : (
