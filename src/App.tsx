@@ -11,7 +11,7 @@ GlobalWorkerOptions.workerSrc = workerBlobURL;
 export const App = (): JSX.Element => {
   return (
     <Router>
-      <div className="bg-yellow-100 h-screen">
+      <div className="bg-gray-100 h-screen">
         <div className="grid grid-cols-12">
           <div className="col-span-3 p-4 pr-0">
             <div className="flex flex-col space-y-2">
@@ -31,7 +31,7 @@ export const App = (): JSX.Element => {
               <Switch>
                 <Route path="/" exact>
                   <div>
-                    <h1>Home</h1>
+                    <h1>Home sweet home</h1>
                   </div>
                 </Route>
                 <Route path="/combine-pdf" exact>
