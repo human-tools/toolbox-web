@@ -31,7 +31,7 @@ export const App = (): JSX.Element => {
               <Switch>
                 <Route path="/" exact>
                   <div>
-                    <h1>Home</h1>
+                    <h1>Home sweet home</h1>
                   </div>
                 </Route>
                 <Route path="/combine-pdf" exact>
