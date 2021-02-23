@@ -3,6 +3,7 @@
   "parserOptions": {
       "ecmaVersion": 2021
   },
+  "plugins": ["react-hooks"],
   "extends": [
       "plugin:@typescript-eslint/recommended",
       "prettier/@typescript-eslint",

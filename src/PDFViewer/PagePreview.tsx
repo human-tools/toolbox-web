@@ -40,6 +40,7 @@ export default function PagePreview({ pdf, pageNumber }: Props): JSX.Element {
 
   return (
     <canvas
+      style={{ pointerEvents: 'none' }}
       ref={canvasRef}
       width={viewport?.width}
       height={viewport?.height}
