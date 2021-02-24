@@ -88,7 +88,7 @@ const CombinePDF = (): JSX.Element => {
           <p>Drag 'n' drop some files here, or click to select files</p>
         )}
       </div>
-      {pdf && (
+      {pdf && pdf.numPages === orderedPages.length && (
         <div
           className="flex flex-wrap flex-grow-1 h-full my-1 items-start "
           ref={setContainerRef}
