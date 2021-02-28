@@ -1,8 +1,11 @@
 import * as React from 'react';
 import CombinePDF from './CombinePDF/CombinePDF';
-import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import workerContent from './pdfjs.worker.min.json';
 import { GlobalWorkerOptions } from 'pdfjs-dist';
+import Home from './Home/Home';
+import ToolsNav from './ToolsNav/ToolsNav';
+import buildtogether from './assets/buildtogether.png';
 
 const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
 const workerBlobURL = URL.createObjectURL(workerBlob);
@@ -12,35 +15,49 @@ export const App = (): JSX.Element => {
   return (
     <Router>
       <div className="bg-gray-100 h-screen">
-        <div className="grid grid-cols-12">
-          <div className="col-span-3 p-4 pr-0">
-            <div className="flex flex-col space-y-2">
-              <div className="px-3 py-2 bg-white shadow-md rounded">
-                <Link to="/">Home</Link>
-              </div>
-              <div className="px-3 py-2 bg-white shadow-md rounded">
-                <Link to="/combine-pdf">Combine PDF</Link>
-              </div>
-              <div className="px-3 py-2 bg-white shadow-md rounded">
-                <Link to="/split-pdf">Split PDF</Link>
-              </div>
-            </div>
+        <div className="h-full flex flex-col">
+          <div className="flex-grow-0 mx-2 mt-3">
+            <ToolsNav showTodo={false} />
           </div>
-          <div className="col-span-9 p-4 h-screen">
-            <div className="bg-white h-full p-4 shadow-md rounded">
+          <div className="flex-grow">
+            <div className="bg-white h-full shadow-md rounded-b">
               <Switch>
                 <Route path="/" exact>
-                  <div>
-                    <h1>Home sweet home</h1>
-                  </div>
+                  <Home />
                 </Route>
                 <Route path="/combine-pdf" exact>
                   <CombinePDF />
                 </Route>
-                <Route path="/split-pdf" exact>
-                  <div>
-                    <h1>Split PDF</h1>
-                    <p>TODO</p>
+                <Route path="/*">
+                  <div className="p-4 flex flex-col justify-center items-center content-center h-full">
+                    <div>
+                      <span className="px-1 text-xs font-bold bg-green-500 text-white">
+                        To Be Built
+                      </span>
+                    </div>
+                    <div>
+                      <img
+                        src={buildtogether}
+                        className="max-w-xs lg:max-w-lg"
+                      />
+                    </div>
+                    <h1 className="text-2xl font-bold max-w-lg my-5">
+                      Come Learn and Build with Us
+                    </h1>
+                    <p className="max-w-lg">
+                      Feel free to get in touch on{' '}
+                      <a
+                        className="underline"
+                        href="https://github.com/human-tools"
+                        target="_blank"
+                      >
+                        our repo
+                      </a>{' '}
+                      if you'd like to help us build this tool and come learn
+                      with us, we're pretty friendly and happy to help guide
+                      throught the process. Or let us know if you'd like to see
+                      us build a tool you need.
+                    </p>
                   </div>
                 </Route>
               </Switch>

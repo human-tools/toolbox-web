@@ -1227,10 +1227,10 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
-"@human-tools/use-sortable@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@human-tools/use-sortable/-/use-sortable-0.0.4.tgz#ab2fce5f7284d2ae685c45dce745ade5f11c9e95"
-  integrity sha512-6Fxyd/dbd9XscsckWD7BdBnHE3RWdk+nQOz90dtmJ9Vz2GEvuIiqzAmZf4b9F7Lnv0ylCmDwamUihEue7b72zA==
+"@human-tools/use-sortable@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@human-tools/use-sortable/-/use-sortable-0.0.5.tgz#9cfed38618e3bb6b39c2303265c0fcd740dfc43b"
+  integrity sha512-370sxhJR3yHXt9OLhi3dqxRVwNmvxfN78dKTER5xo95XTv7gQgPvg05PlekQTajUBeR7H25n6LcBlWHxrcTmCw==
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
