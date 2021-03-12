@@ -6,6 +6,7 @@ import { GlobalWorkerOptions } from 'pdfjs-dist';
 import Home from './Home/Home';
 import ToolsNav from './ToolsNav/ToolsNav';
 import buildtogether from './assets/buildtogether.png';
+import CreatePhotosSlideshow from './CreatePhotosSlideshow/CreatePhotosSlideshow';
 
 const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
 const workerBlobURL = URL.createObjectURL(workerBlob);
@@ -27,6 +28,9 @@ export const App = (): JSX.Element => {
                 </Route>
                 <Route path="/combine-pdf" exact>
                   <CombinePDF />
+                </Route>
+                <Route path="/create-photos-slideshow" exact>
+                  <CreatePhotosSlideshow />
                 </Route>
                 <Route path="/*">
                   <div className="p-4 flex flex-col justify-center items-center content-center h-full">

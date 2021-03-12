@@ -34,6 +34,15 @@ const ToolsNav = ({
       >
         Combine PDF
       </NavLink>
+      <NavLink
+        exact
+        className={className}
+        activeClassName={activeClassName}
+        to="/create-photos-slideshow"
+      >
+        Photos Slideshow
+      </NavLink>
+
       {showTodo && (
         <>
           <NavLink
@@ -80,15 +89,6 @@ const ToolsNav = ({
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
             Make GIF
-          </NavLink>
-          <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
-            to="/create-slideshow"
-          >
-            <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
-            Create Slideshow
           </NavLink>
           <NavLink
             exact

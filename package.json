@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.9.7",
     "@human-tools/use-sortable": "^0.0.5",
     "@tailwindcss/forms": "^0.2.1",
+    "exif-auto-rotate": "^0.2.0",
     "file-saver": "^2.0.5",
     "pdf-lib": "^1.16.0",
     "pdfjs-dist": "^2.6.347",
@@ -13,6 +15,7 @@
     "react-dropzone": "^11.3.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.2",
+    "react-spinners": "^0.10.6",
     "tailwindcss": "^2.0.3",
     "typescript": "^4.1.5",
     "web-vitals": "^1.1.0"
