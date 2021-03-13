@@ -1,9 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import UploadButton from '../components/UploadButton';
 import { createFFmpeg } from '@ffmpeg/ffmpeg';
-import Rotator from 'exif-auto-rotate';
+import Rotator from './Rotator';
 import { useSortable } from '@human-tools/use-sortable';
 import GridLoader from 'react-spinners/GridLoader';
+
+const getCleanName = (file: File): string => {
+  return file.name.replace(/([^a-zA-Z0-9]+)/gi, '-');
+};
 
 interface ImagePreviewProps {
   image?: ImageData;
@@ -40,13 +44,6 @@ interface ImageData {
   width: number;
   height: number;
 }
-
-const autoRotateFile = (file: File) =>
-  new Promise<Blob>((resolve) => {
-    Rotator.createRotatedImage(file, 'blob', (blob) => {
-      resolve(blob as Blob);
-    });
-  });
 
 const readImageSizing = (url: string) =>
   new Promise<{ width: number; height: number }>((resolve) => {
@@ -99,7 +96,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
     for (const index of orderedItems) {
       ffmpeg.FS(
         'writeFile',
-        files[index].name,
+        getCleanName(files[index]),
         new Uint8Array(correctedFileArrayBuffer[index])
       );
     }
@@ -109,7 +106,9 @@ const CreatePhotosSlideshow = (): JSX.Element => {
       .concat(
         orderedItems.map((index) => {
           const slideDuration = 1;
-          return `file ${files[index].name}\nduration ${slideDuration}`;
+          return `file ${getCleanName(
+            files[index]
+          )}\nduration ${slideDuration}`;
         })
       )
       .join('\n');
@@ -135,7 +134,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
       setFiles(files);
       setItems(new Array(files.length).fill(0).map((_, index) => index));
       for (const file of files) {
-        const blob = await autoRotateFile(file);
+        const blob = await Rotator.createRotatedImage(file);
         const url = URL.createObjectURL(blob);
         const correctedFile = await blob.arrayBuffer();
         const { width, height } = await readImageSizing(url);
