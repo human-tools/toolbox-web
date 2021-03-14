@@ -38,6 +38,14 @@ const ToolsNav = ({
         exact
         className={className}
         activeClassName={activeClassName}
+        to="/split-pdf"
+      >
+        Split PDF
+      </NavLink>
+      <NavLink
+        exact
+        className={className}
+        activeClassName={activeClassName}
         to="/create-photos-slideshow"
       >
         Photos Slideshow
@@ -45,15 +53,6 @@ const ToolsNav = ({
 
       {showTodo && (
         <>
-          <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
-            to="/split-pdf"
-          >
-            <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
-            Split PDF
-          </NavLink>
           <NavLink
             exact
             className={className}
