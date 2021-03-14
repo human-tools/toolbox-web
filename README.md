@@ -1,6 +1,6 @@
 # Human Tools - Toolbox
 
-[human-tools.netlify.app](https://human-tools.netlify.app/)
+[humantools.io](https://humantools.io/)
 
 This is the project that will include a collection of simple tools around the same principles.
 
