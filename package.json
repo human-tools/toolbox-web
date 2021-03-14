@@ -8,6 +8,7 @@
     "@tailwindcss/forms": "^0.2.1",
     "exif-auto-rotate": "^0.2.0",
     "file-saver": "^2.0.5",
+    "jszip": "^3.6.0",
     "pdf-lib": "^1.16.0",
     "pdfjs-dist": "^2.6.347",
     "react": "^17.0.1",

@@ -7,6 +7,7 @@ import Home from './Home/Home';
 import ToolsNav from './ToolsNav/ToolsNav';
 import buildtogether from './assets/buildtogether.png';
 import CreatePhotosSlideshow from './CreatePhotosSlideshow/CreatePhotosSlideshow';
+import SplitPDF from './SplitPDF/SplitPDF';
 
 const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
 const workerBlobURL = URL.createObjectURL(workerBlob);
@@ -28,6 +29,9 @@ export const App = (): JSX.Element => {
                 </Route>
                 <Route path="/combine-pdf" exact>
                   <CombinePDF />
+                </Route>
+                <Route path="/split-pdf" exact>
+                  <SplitPDF />
                 </Route>
                 <Route path="/create-photos-slideshow" exact>
                   <CreatePhotosSlideshow />
