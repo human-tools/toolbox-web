@@ -1,5 +1,6 @@
 import * as React from 'react';
 import CombinePDF from './CombinePDF/CombinePDF';
+import GeneratePDFFromImages from './GenearatePDF/GeneratePDF';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import workerContent from './pdfjs.worker.min.json';
 import { GlobalWorkerOptions } from 'pdfjs-dist';
@@ -35,6 +36,9 @@ export const App = (): JSX.Element => {
                 </Route>
                 <Route path="/create-photos-slideshow" exact>
                   <CreatePhotosSlideshow />
+                </Route>
+                <Route path="/images-to-pdf" exact>
+                  <GeneratePDFFromImages />
                 </Route>
                 <Route path="/*">
                   <div className="p-4 flex flex-col justify-center items-center content-center h-full">

@@ -50,6 +50,14 @@ const ToolsNav = ({
       >
         Photos Slideshow
       </NavLink>
+      <NavLink
+        exact
+        className={className}
+        activeClassName={activeClassName}
+        to="/images-to-pdf"
+      >
+        Images to PDF
+      </NavLink>
 
       {showTodo && (
         <>
