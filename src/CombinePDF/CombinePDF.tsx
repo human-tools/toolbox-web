@@ -38,8 +38,8 @@ const CombinePDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
   const {
-    orderedItems: orderedPages,
-    setItems: setPages,
+    orderedItems: pagesOrder,
+    setItems: setPagesOrder,
     setContainerRef,
     addDraggableNodeRef,
   } = useSortable<number>([], {
@@ -55,21 +55,30 @@ const CombinePDF = (): JSX.Element => {
     async (files) => {
       const { bytes, pageCount, doc: newDoc } = await mergePdfs(files, doc);
       const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
+
+      // Calculate new page order with the added pages at the end of the order.
+      // To avoid losing previously ordered indexes.
+      const oldPagesOrder = pagesOrder;
+      const oldPageCount = oldPagesOrder.length;
+      const newlyAddedPagesOrder = new Array(pageCount - oldPageCount)
+        .fill(0)
+        .map((_, index) => oldPageCount + index + 1);
+      const newOrder = [...oldPagesOrder, ...newlyAddedPagesOrder];
       setDoc(newDoc);
       setPDF(pdf);
-      setPages(new Array(pageCount).fill(0).map((_, index) => index + 1));
+      setPagesOrder(newOrder);
     },
-    [setPages, doc]
+    [setPagesOrder, doc, pagesOrder]
   );
 
   const onSave = useCallback(async () => {
     if (!doc) return;
-    const { bytes } = await getOrderedPdf(doc, orderedPages);
+    const { bytes } = await getOrderedPdf(doc, pagesOrder);
     saveAs(
       new Blob([bytes]),
       fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`
     );
-  }, [doc, fileName, orderedPages]);
+  }, [doc, fileName, pagesOrder]);
 
   return (
     <div className="h-full flex flex-col">
@@ -89,13 +98,13 @@ const CombinePDF = (): JSX.Element => {
           <div className="px-3 pb-3 flex-grow ">
             <UploadButton onDrop={onDrop} accept=".pdf" fullSized={!pdf} />
           </div>
-          {pdf && pdf.numPages === orderedPages.length && (
+          {pdf && pdf.numPages === pagesOrder.length && (
             <div className="flex flex-col flex-grow">
               <div
                 className="flex p-2 flex-wrap flex-grow-1 h-full my-1 items-start content-start justify-center lg:justify-start"
                 ref={setContainerRef}
               >
-                {orderedPages.map((pageNumber: number) => (
+                {pagesOrder.map((pageNumber: number) => (
                   <div
                     ref={addDraggableNodeRef}
                     key={pageNumber}
