@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFImage } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
@@ -7,15 +7,28 @@ import PagePreview from '../PDFViewer/PagePreview';
 import { useSortable } from '@human-tools/use-sortable';
 import UploadButton from '../components/UploadButton';
 
-async function mergePdfs(files: File[], addToDoc?: PDFDocument) {
+async function generatePDF(files: File[], addToDoc?: PDFDocument) {
+  console.log(files, addToDoc);
   const pdfDoc = addToDoc ? addToDoc : await PDFDocument.create();
+  console.log(pdfDoc);
 
   for (const file of files) {
-    const arrayBuffer = await file.arrayBuffer();
-    const doc = await PDFDocument.load(arrayBuffer);
-    const pages = await pdfDoc.copyPages(doc, doc.getPageIndices());
-    pages.forEach((page) => pdfDoc.addPage(page));
+    let image: PDFImage | undefined = undefined;
+    if (file.type === 'image/png') {
+      image = await pdfDoc.embedPng(await file.arrayBuffer());
+    } else if (file.type === 'image/jpeg') {
+      image = await pdfDoc.embedJpg(await file.arrayBuffer());
+    }
+    if (!image) continue;
+    const page = pdfDoc.addPage([image.width, image.height]);
+    page.drawImage(image, {
+      x: 0,
+      y: 0,
+      width: image.width,
+      height: image.height,
+    });
   }
+
   return {
     doc: pdfDoc,
     bytes: await pdfDoc.save(),
@@ -34,7 +47,7 @@ async function getOrderedPdf(srcPdf: PDFDocument, order: number[]) {
   };
 }
 
-const CombinePDF = (): JSX.Element => {
+const GeneratePDFFromImages = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
   const {
@@ -53,9 +66,12 @@ const CombinePDF = (): JSX.Element => {
 
   const onDrop = useCallback(
     async (files) => {
-      const { bytes, pageCount, doc: newDoc } = await mergePdfs(files, doc);
+      const { bytes, pageCount, doc: newPdfDoc } = await generatePDF(
+        files,
+        doc
+      );
       const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
-      setDoc(newDoc);
+      setDoc(newPdfDoc);
       setPDF(pdf);
       setPages(new Array(pageCount).fill(0).map((_, index) => index + 1));
     },
@@ -75,19 +91,24 @@ const CombinePDF = (): JSX.Element => {
     <div className="h-full flex flex-col">
       <div className="m-3 p-3 bg-green-200 rounded">
         <p>
-          This tool helps you to quickly merge bunch of PDF files into one.{' '}
+          This tool helps you to quickly merge bunch of images into one PDF
+          file.{' '}
           <b>
             No Data is ever uploaded to any servers. All the magic happen in
             your browser.
           </b>{' '}
-          Just drag-and-drop some PDF files, re-order your pages as you'd like
+          Just drag-and-drop some images, re-order your pages as you'd like and
           and then download the file!
         </p>
       </div>
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
           <div className="px-3 pb-3 flex-grow ">
-            <UploadButton onDrop={onDrop} accept=".pdf" fullSized={!pdf} />
+            <UploadButton
+              onDrop={onDrop}
+              accept=".png,.jpg,.jpeg"
+              fullSized={!pdf}
+            />
           </div>
           {pdf && pdf.numPages === orderedPages.length && (
             <div className="flex flex-col flex-grow">
@@ -121,7 +142,7 @@ const CombinePDF = (): JSX.Element => {
                   onClick={onSave}
                   disabled={!pdf}
                 >
-                  Merge & Download
+                  Download PDF
                 </button>
               </div>
             </div>
@@ -132,4 +153,4 @@ const CombinePDF = (): JSX.Element => {
   );
 };
 
-export default CombinePDF;
+export default GeneratePDFFromImages;
