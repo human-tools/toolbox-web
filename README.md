@@ -10,7 +10,10 @@ This is the project that will include a collection of simple tools around the sa
 
 # What's Built?
 
-- Combile PDF - A simple tool allows users to drag and drop arbitrary PDF files and merge them together. The tool allows users to re-arrange pages by drag-n-drop to reorder pages before downloading the final PDF. All of that is done without uploading any user data to servers. It's all processed on the user device.
+- [Combine PDF](https://humantools.io/combine-pdf) - This tool helps you to quickly merge bunch of PDF files into one.
+- [Split PDF](https://humantools.io/split-pdf) - This tool helps you to quickly split a large PDF file pages into a lot of single-file PDF files.
+- [Photos Slideshow](https://humantools.io/split-pdf) - This tool helps you to quickly turn your photos into a video slideshow.
+- [Images to PDF](https://humantools.io/images-to-pdf) - This tool helps you to quickly merge bunch of images into one PDF file.
 
 # Deploying New Version
 
