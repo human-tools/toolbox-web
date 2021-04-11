@@ -23,6 +23,23 @@ async function mergePdfs(files: File[], addToDoc?: PDFDocument) {
   };
 }
 
+// This is a work around for the pdf-js library because removePage method does not delete all
+// of the page's objects from the document but removes the reference from page tree
+// there's a feature request here https://github.com/Hopding/pdf-lib/issues/140
+// once it's resolved this work around can be deprecated.
+async function removePageFromPdf(doc: PDFDocument, currentPages: number[]) {
+  const modifiedDoc = await PDFDocument.create();
+
+  const pages = await modifiedDoc.copyPages(doc, currentPages);
+  pages.forEach((page) => modifiedDoc.addPage(page));
+
+  return {
+    modifiedDoc,
+    bytes: await modifiedDoc.save(),
+    pageCount: modifiedDoc.getPageCount(),
+  };
+}
+
 async function getOrderedPdf(srcPdf: PDFDocument, order: number[]) {
   const pdfDoc = await PDFDocument.create();
   const pages = await pdfDoc.copyPages(srcPdf, srcPdf.getPageIndices());
@@ -80,6 +97,35 @@ const CombinePDF = (): JSX.Element => {
     );
   }, [doc, fileName, pagesOrder]);
 
+  const onDelete = async (pageNumber: number) => {
+    if (!doc) return;
+
+    const currentPages = new Array(doc.getPageCount())
+      .fill(0)
+      .map((_, index) => index)
+      .filter((page) => page !== pageNumber - 1);
+
+    // A document needs to at least have one page
+    // @(TODO) show error message
+    if (currentPages.length < 1) return;
+
+    const { modifiedDoc, bytes, pageCount } = await removePageFromPdf(
+      doc,
+      currentPages
+    );
+
+    const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
+
+    const newPageOrder = new Array(pageCount)
+      .fill(0)
+      .map((_, index) => index + 1);
+
+    setPagesOrder(newPageOrder);
+
+    setDoc(modifiedDoc);
+    setPDF(pdf);
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="m-3 p-3 bg-green-200 rounded">
@@ -110,6 +156,12 @@ const CombinePDF = (): JSX.Element => {
                     key={pageNumber}
                     className="shadow p-1 bg-white m-1 rounded-md overflow-hidden border-4 border-white hover:cursor-move"
                   >
+                    <div
+                      onClick={(e) => onDelete(pageNumber)}
+                      className="delete-file"
+                    >
+                      Delete
+                    </div>
                     <PagePreview
                       key={pageNumber}
                       pageNumber={pageNumber}
