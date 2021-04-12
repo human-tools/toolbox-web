@@ -158,7 +158,7 @@ const CombinePDF = (): JSX.Element => {
                   >
                     <div
                       onClick={(e) => onDelete(pageNumber)}
-                      className="delete-file"
+                      className="absolute rounded-md p-1 bg-red-600 text-white -mt-6 text-xs cursor-pointer"
                     >
                       Delete
                     </div>
