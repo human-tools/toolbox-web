@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.9.7",
+    "@heroicons/react": "^2.0.13",
     "@human-tools/use-sortable": "^0.0.5",
     "@tailwindcss/forms": "^0.2.1",
     "exif-auto-rotate": "^0.2.0",

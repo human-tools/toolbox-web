@@ -1314,6 +1314,11 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
+"@heroicons/react@^2.0.13":
+  version "2.0.13"
+  resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.0.13.tgz#9b1cc54ff77d6625c9565efdce0054a4bcd9074c"
+  integrity sha512-iSN5XwmagrnirWlYEWNPdCDj9aRYVD/lnK3JlsC9/+fqGF80k8C7rl+1HCvBX0dBoagKqOFBs6fMhJJ1hOg1EQ==
+
 "@human-tools/use-sortable@^0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@human-tools/use-sortable/-/use-sortable-0.0.5.tgz#9cfed38618e3bb6b39c2303265c0fcd740dfc43b"
