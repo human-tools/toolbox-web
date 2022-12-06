@@ -1,14 +1,13 @@
-import * as React from 'react';
-import CombinePDF from './CombinePDF/CombinePDF';
-import GeneratePDFFromImages from './GenearatePDF/GeneratePDF';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import workerContent from './pdfjs.worker.min.json';
 import { GlobalWorkerOptions } from 'pdfjs-dist';
-import Home from './Home/Home';
-import ToolsNav from './ToolsNav/ToolsNav';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import buildtogether from './assets/buildtogether.png';
+import CombinePDF from './CombinePDF/CombinePDF';
 import CreatePhotosSlideshow from './CreatePhotosSlideshow/CreatePhotosSlideshow';
+import Home from './Home/Home';
+import ImagesToPDF from './ImagesToPDF/ImagesToPDF';
+import workerContent from './pdfjs.worker.min.json';
 import SplitPDF from './SplitPDF/SplitPDF';
+import ToolsNav from './ToolsNav/ToolsNav';
 
 const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
 const workerBlobURL = URL.createObjectURL(workerBlob);
@@ -38,7 +37,7 @@ export const App = (): JSX.Element => {
                   <CreatePhotosSlideshow />
                 </Route>
                 <Route path="/images-to-pdf" exact>
-                  <GeneratePDFFromImages />
+                  <ImagesToPDF />
                 </Route>
                 <Route path="/*">
                   <div className="p-4 flex flex-col justify-center items-center content-center h-full">
