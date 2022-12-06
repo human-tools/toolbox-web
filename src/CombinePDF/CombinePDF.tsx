@@ -38,6 +38,7 @@ async function getOrderedPdf(srcPdf: PDFDocument, order: number[]) {
 const CombinePDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
+  const [scale, setScale] = useState<number>(0.25);
   const {
     orderedItems: pagesOrder,
     setItems: setPagesOrder,
@@ -111,13 +112,54 @@ const CombinePDF = (): JSX.Element => {
       </div>
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
-          <div className="px-3 pb-3 flex-grow ">
-            <UploadButton onDrop={onDrop} accept=".pdf" fullSized={!pdf} />
-          </div>
+          {!pdf && (
+            <div className="px-3 pb-3 flex-grow ">
+              <UploadButton onDrop={onDrop} accept=".pdf" fullSized={!pdf} />
+            </div>
+          )}
           {pdf && (
             <div className="flex flex-col flex-grow">
+              {/* Toolbar */}
+              <div className="flex p-3">
+                <div className="h-10 w-48">
+                  <UploadButton onDrop={onDrop} accept=".pdf" fullSized={false}>
+                    <span className="text-base">Add Files</span>
+                  </UploadButton>
+                </div>
+                <div>
+                  <button
+                    className="h-10 self-end bg-red-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2 text-base"
+                    onClick={() => {
+                      setPDF(undefined);
+                      setDoc(undefined);
+                      setPagesOrder([]);
+                    }}
+                    disabled={!pdf}
+                  >
+                    Clear & Start Fresh
+                  </button>
+                </div>
+                <div className="flex-grow"></div>
+                <div>
+                  <span className="px-2 text-gray-500">Page Size</span>
+                  <button
+                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                    onClick={() => setScale((scale) => scale / 1.2)}
+                    disabled={!pdf}
+                  >
+                    <span>Smaller</span>
+                  </button>
+                  <button
+                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
+                    onClick={() => setScale((scale) => scale * 1.2)}
+                    disabled={!pdf}
+                  >
+                    Larger
+                  </button>
+                </div>
+              </div>
               <div
-                className="flex p-2 flex-wrap flex-grow-1 h-full my-1 items-start content-start justify-center lg:justify-start"
+                className="flex p-2 flex-wrap flex-grow-1 h-full my-1 items-start content-start lg:justify-start"
                 ref={setContainerRef}
               >
                 {pagesOrder.map((pageNumber: number) => (
@@ -136,6 +178,7 @@ const CombinePDF = (): JSX.Element => {
                       key={pageNumber}
                       pageNumber={pageNumber}
                       pdf={pdf}
+                      scale={scale}
                     />
                   </div>
                 ))}

@@ -16,7 +16,8 @@ function UploadButton({
   onDrop,
   accept = '',
   fullSized = true,
-}: Props): ReactElement {
+  children,
+}: React.PropsWithChildren<Props>): ReactElement {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
@@ -30,18 +31,23 @@ function UploadButton({
         } items-center justify-center  bg-blue-100 rounded text-center text-blue-900  hover:bg-blue-200 hover:text-white hover:cursor-pointer`}
       >
         <input {...getInputProps()} accept={accept} />
-        <img
-          src={dragdrop}
-          className={`${
-            !fullSized
-              ? 'w-20 lg:w-auto lg:max-w-sm lg:mb-20'
-              : 'max-w-xs lg:max-w-xl mb-10 lg:mb-0 lg:mr-20'
-          }`}
-        />
-        {isDragActive ? (
-          <p>Drop the files here ...</p>
-        ) : (
-          <p>Drag 'n' drop some files here, or click to select files</p>
+        {children && children}
+        {!children && (
+          <div>
+            <img
+              src={dragdrop}
+              className={`${
+                !fullSized
+                  ? 'w-20 lg:w-auto lg:max-w-sm lg:mb-20'
+                  : 'max-w-xs lg:max-w-xl mb-10 lg:mb-0 lg:mr-20'
+              }`}
+            />
+            {isDragActive ? (
+              <p>Drop the files here ...</p>
+            ) : (
+              <p>Drag 'n' drop some files here, or click to select files</p>
+            )}
+          </div>
         )}
       </div>
     </div>

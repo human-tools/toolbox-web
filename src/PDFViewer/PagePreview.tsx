@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { GlobalWorkerOptions } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
 import { PageViewport } from 'pdfjs-dist/types/display/display_utils';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import workerContent from '../pdfjs.worker.min.json';
 
 const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
@@ -11,15 +11,20 @@ GlobalWorkerOptions.workerSrc = workerBlobURL;
 interface Props {
   pdf: PDFDocumentProxy;
   pageNumber: number;
+  scale?: number;
 }
 
-export default function PagePreview({ pdf, pageNumber }: Props): JSX.Element {
+export default function PagePreview({
+  pdf,
+  pageNumber,
+  scale,
+}: Props): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [viewport, setViewport] = useState<PageViewport>();
 
   const load = useCallback(async () => {
     const page = await pdf.getPage(pageNumber);
-    const viewport = page.getViewport({ scale: 0.25 });
+    const viewport = page.getViewport({ scale: scale || 0.25 });
     const canvas = canvasRef.current;
     if (!canvas || !viewport) return;
     const canvasContext = canvas.getContext('2d');
@@ -32,7 +37,7 @@ export default function PagePreview({ pdf, pageNumber }: Props): JSX.Element {
       viewport,
     });
     setViewport(viewport);
-  }, [pageNumber, pdf]);
+  }, [pageNumber, pdf, scale]);
 
   useEffect(() => {
     load();
