@@ -1,4 +1,4 @@
-import { XCircleIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { useSortable } from '@human-tools/use-sortable';
 import { saveAs } from 'file-saver';
 import { PDFDocument } from 'pdf-lib';
@@ -39,6 +39,9 @@ const CombinePDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
   const [scale, setScale] = useState<number>(0.25);
+  const [previewPageNumber, setPreviewPageNumber] = useState<
+    number | undefined
+  >(undefined);
   const {
     orderedItems: pagesOrder,
     setItems: setPagesOrder,
@@ -110,6 +113,17 @@ const CombinePDF = (): JSX.Element => {
           and then download the file!
         </p>
       </div>
+      {previewPageNumber && pdf && (
+        <div className="flex justify-center items-center absolute h-full w-full bg-black bg-opacity-60 z-20 top-0 overflow-auto">
+          <button
+            className="absolute top-0 right-0 p-4"
+            onClick={() => setPreviewPageNumber(undefined)}
+          >
+            <XMarkIcon className="w-10 h-10 text-white" />
+          </button>
+          <PagePreview scale={1.25} pageNumber={previewPageNumber} pdf={pdf} />
+        </div>
+      )}
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
           {!pdf && (
@@ -174,12 +188,14 @@ const CombinePDF = (): JSX.Element => {
                     >
                       <XCircleIcon className="h-4 w-4 text-red-500" />
                     </div>{' '}
-                    <PagePreview
-                      key={pageNumber}
-                      pageNumber={pageNumber}
-                      pdf={pdf}
-                      scale={scale}
-                    />
+                    <div onClick={() => setPreviewPageNumber(pageNumber)}>
+                      <PagePreview
+                        key={pageNumber}
+                        pageNumber={pageNumber}
+                        pdf={pdf}
+                        scale={scale}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
