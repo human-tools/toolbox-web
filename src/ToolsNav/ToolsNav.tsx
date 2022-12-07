@@ -17,51 +17,51 @@ const ToolsNav = ({
     <>
       {showHome && (
         <NavLink
-          exact
-          className={className}
-          activeClassName={activeClassName}
+          className={(navigationData) =>
+            navigationData.isActive ? activeClassName : className
+          }
           to="/"
         >
           Home
         </NavLink>
       )}
       <NavLink
-        exact
-        className={className}
-        activeClassName={activeClassName}
+        className={(navigationData) =>
+          navigationData.isActive ? activeClassName : className
+        }
         to="/combine-pdf"
       >
         Combine PDF
       </NavLink>
       <NavLink
-        exact
-        className={className}
-        activeClassName={activeClassName}
+        className={(navigationData) =>
+          navigationData.isActive ? activeClassName : className
+        }
         to="/split-pdf"
       >
         Split PDF
       </NavLink>
       <NavLink
-        exact
-        className={className}
-        activeClassName={activeClassName}
+        className={(navigationData) =>
+          navigationData.isActive ? activeClassName : className
+        }
         to="/create-photos-slideshow"
       >
         Photos Slideshow
       </NavLink>
       <NavLink
-        exact
-        className={className}
-        activeClassName={activeClassName}
+        className={(navigationData) =>
+          navigationData.isActive ? activeClassName : className
+        }
         to="/images-to-pdf"
       >
         Images to PDF
       </NavLink>
 
       <NavLink
-        exact
-        className={className}
-        activeClassName={activeClassName}
+        className={(navigationData) =>
+          navigationData.isActive ? activeClassName : className
+        }
         to="/quick-sign-pdf"
       >
         Quick Sign
@@ -69,45 +69,45 @@ const ToolsNav = ({
       {showTodo && (
         <>
           <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
+            className={(navigationData) =>
+              navigationData.isActive ? activeClassName : className
+            }
             to="/bulk-sign"
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
             Bulk Sign
           </NavLink>
           <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
+            className={(navigationData) =>
+              navigationData.isActive ? activeClassName : className
+            }
             to="/remove-meta"
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
             Remove Meta
           </NavLink>
           <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
+            className={(navigationData) =>
+              navigationData.isActive ? activeClassName : className
+            }
             to="/make-gif"
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
             Make GIF
           </NavLink>
           <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
+            className={(navigationData) =>
+              navigationData.isActive ? activeClassName : className
+            }
             to="/bulk-edit-photos"
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
             Bulk-Edit Photos
           </NavLink>
           <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
+            className={(navigationData) =>
+              navigationData.isActive ? activeClassName : className
+            }
             to="/create-meme"
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}

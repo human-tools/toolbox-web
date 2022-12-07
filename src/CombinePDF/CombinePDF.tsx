@@ -57,7 +57,7 @@ const CombinePDF = (): JSX.Element => {
   );
 
   const onDrop = useCallback(
-    async (files) => {
+    async (files: File[]) => {
       const oldPageCount = doc?.getPageCount() || 0;
       const { bytes, pageCount, doc: newDoc } = await mergePdfs(files, doc);
       const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
@@ -183,7 +183,7 @@ const CombinePDF = (): JSX.Element => {
                     className="relative shadow p-1 bg-white m-1 rounded-md overflow-hidden border-4 border-white hover:cursor-move"
                   >
                     <div
-                      onClick={(e) => onDelete(pageNumber)}
+                      onClick={() => onDelete(pageNumber)}
                       className="absolute right-0 rounded-md p-1 text-white text-xs cursor-pointer bg-white"
                     >
                       <XCircleIcon className="h-4 w-4 text-red-500" />

@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
-import { PDFDocument, PDFImage } from 'pdf-lib';
+import { useSortable } from '@human-tools/use-sortable';
 import { saveAs } from 'file-saver';
+import { PDFDocument, PDFImage } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import PagePreview from '../PDFViewer/PagePreview';
-import { useSortable } from '@human-tools/use-sortable';
+import { useCallback, useState } from 'react';
 import UploadButton from '../components/UploadButton';
+import PagePreview from '../PDFViewer/PagePreview';
 
 async function generatePDF(files: File[], addToDoc?: PDFDocument) {
   console.log(files, addToDoc);
@@ -65,7 +65,7 @@ const GeneratePDFFromImages = (): JSX.Element => {
   );
 
   const onDrop = useCallback(
-    async (files) => {
+    async (files: File[]) => {
       const { bytes, pageCount, doc: newPdfDoc } = await generatePDF(
         files,
         doc

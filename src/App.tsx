@@ -1,5 +1,5 @@
 import { GlobalWorkerOptions } from 'pdfjs-dist';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import buildtogether from './assets/buildtogether.png';
 import CombinePDF from './CombinePDF/CombinePDF';
 import CreatePhotosSlideshow from './CreatePhotosSlideshow/CreatePhotosSlideshow';
@@ -24,58 +24,55 @@ export const App = (): JSX.Element => {
           </div>
           <div className="flex-grow">
             <div className="bg-white h-full shadow-md rounded-b">
-              <Switch>
-                <Route path="/" exact>
-                  <Home />
-                </Route>
-                <Route path="/combine-pdf" exact>
-                  <CombinePDF />
-                </Route>
-                <Route path="/split-pdf" exact>
-                  <SplitPDF />
-                </Route>
-                <Route path="/create-photos-slideshow" exact>
-                  <CreatePhotosSlideshow />
-                </Route>
-                <Route path="/images-to-pdf" exact>
-                  <ImagesToPDF />
-                </Route>
-                <Route path="/quick-sign-pdf" exact>
-                  <QuickSignPDF />
-                </Route>
-                <Route path="/*">
-                  <div className="p-4 flex flex-col justify-center items-center content-center h-full">
-                    <div>
-                      <span className="px-1 text-xs font-bold bg-green-500 text-white">
-                        To Be Built
-                      </span>
+              <Routes>
+                <Route path="/" element={<Home />}></Route>
+                <Route path="/combine-pdf" element={<CombinePDF />}></Route>
+                <Route path="/split-pdf" element={<SplitPDF />}></Route>
+                <Route
+                  path="/create-photos-slideshow"
+                  element={<CreatePhotosSlideshow />}
+                ></Route>
+                <Route path="/images-to-pdf" element={<ImagesToPDF />}></Route>
+                <Route
+                  path="/quick-sign-pdf"
+                  element={<QuickSignPDF />}
+                ></Route>
+                <Route
+                  path="/*"
+                  element={
+                    <div className="p-4 flex flex-col justify-center items-center content-center h-full">
+                      <div>
+                        <span className="px-1 text-xs font-bold bg-green-500 text-white">
+                          To Be Built
+                        </span>
+                      </div>
+                      <div>
+                        <img
+                          src={buildtogether}
+                          className="max-w-xs lg:max-w-lg"
+                        />
+                      </div>
+                      <h1 className="text-2xl font-bold max-w-lg my-5">
+                        Come Learn and Build with Us
+                      </h1>
+                      <p className="max-w-lg">
+                        Feel free to get in touch on{' '}
+                        <a
+                          className="underline"
+                          href="https://github.com/human-tools"
+                          target="_blank"
+                        >
+                          our repo
+                        </a>{' '}
+                        if you'd like to help us build this tool and come learn
+                        with us, we're pretty friendly and happy to help guide
+                        throught the process. Or let us know if you'd like to
+                        see us build a tool you need.
+                      </p>
                     </div>
-                    <div>
-                      <img
-                        src={buildtogether}
-                        className="max-w-xs lg:max-w-lg"
-                      />
-                    </div>
-                    <h1 className="text-2xl font-bold max-w-lg my-5">
-                      Come Learn and Build with Us
-                    </h1>
-                    <p className="max-w-lg">
-                      Feel free to get in touch on{' '}
-                      <a
-                        className="underline"
-                        href="https://github.com/human-tools"
-                        target="_blank"
-                      >
-                        our repo
-                      </a>{' '}
-                      if you'd like to help us build this tool and come learn
-                      with us, we're pretty friendly and happy to help guide
-                      throught the process. Or let us know if you'd like to see
-                      us build a tool you need.
-                    </p>
-                  </div>
-                </Route>
-              </Switch>
+                  }
+                ></Route>
+              </Routes>
             </div>
           </div>
         </div>

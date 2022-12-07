@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import { saveAs } from 'file-saver';
-import UploadButton from '../components/UploadButton';
 import JSZip from 'jszip';
+import { PDFDocument } from 'pdf-lib';
+import { useCallback } from 'react';
+import UploadButton from '../components/UploadButton';
 
 async function splitPDF(largePdfFile: File): Promise<PDFDocument[]> {
   const sourceDoc = await PDFDocument.load(await largePdfFile.arrayBuffer());
@@ -18,7 +18,7 @@ async function splitPDF(largePdfFile: File): Promise<PDFDocument[]> {
 }
 
 const SplitPDF = (): JSX.Element => {
-  const onDrop = useCallback(async (files) => {
+  const onDrop = useCallback(async (files: File[]) => {
     if (files.length === 0) return;
 
     const docs = await splitPDF(files[0]);

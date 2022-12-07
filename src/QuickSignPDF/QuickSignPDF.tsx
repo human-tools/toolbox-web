@@ -66,9 +66,13 @@ const QuickSignPDF = (): JSX.Element => {
 
   const pdfDrawRef = useRef<UseSvgDrawing>(null);
 
+<<<<<<< Updated upstream
   const onDrop = useCallback(async (files) => {
     pdfDrawRef.current?.clear();
     setActivePage(1);
+=======
+  const onDrop = useCallback(async (files: File[]) => {
+>>>>>>> Stashed changes
     const { bytes, doc: newDoc } = await createPDF(files);
     const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
     setDoc(newDoc);
@@ -206,7 +210,7 @@ const QuickSignPDF = (): JSX.Element => {
                       activePage >= (doc?.getPageCount() || 1)
                     }
                     className={`h-10 self-end text-white px-3 py-2 rounded-md ${
-                      activePage >= doc!.getPageCount() || isSigning
+                      activePage >= (doc?.getPageCount() || 0) || isSigning
                         ? 'bg-gray-200 cursor-not-allowed	'
                         : 'bg-green-500 hover:bg-green-700'
                     }`}

@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react';
-import UploadButton from '../components/UploadButton';
 import { createFFmpeg } from '@ffmpeg/ffmpeg';
-import Rotator from './Rotator';
 import { useSortable } from '@human-tools/use-sortable';
+import { useCallback, useState } from 'react';
 import GridLoader from 'react-spinners/GridLoader';
+import UploadButton from '../components/UploadButton';
+import Rotator from './Rotator';
 
 const getCleanName = (file: File): string => {
   return file.name.replace(/([^a-zA-Z0-9]+)/gi, '-');
