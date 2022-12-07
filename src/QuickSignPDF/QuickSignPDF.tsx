@@ -187,7 +187,7 @@ const QuickSignPDF = (): JSX.Element => {
                     disabled={
                       isSigning ||
                       !pdf ||
-                      activePage >= (doc?.getPageCount() || 1)
+                      activePage > (doc?.getPageCount() || 1)
                     }
                     className={`h-10 self-end text-white px-3 py-2 rounded-md mx-2 ${
                       activePage <= 1 || isSigning
