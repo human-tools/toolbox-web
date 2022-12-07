@@ -130,10 +130,11 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   }, [correctedFileArrayBuffer, files, isGenerating, orderedItems]);
 
   const onDrop = useCallback(
-    async (files: File[]) => {
-      setFiles(files);
-      setItems(new Array(files.length).fill(0).map((_, index) => index));
-      for (const file of files) {
+    async (newFiles: File[]) => {
+      setFiles((oldFiles) => [...oldFiles, ...newFiles]);
+      const newFilesLength = newFiles.length + files.length;
+      setItems(new Array(newFilesLength).fill(0).map((_, index) => index));
+      for (const file of newFiles) {
         const blob = await Rotator.createRotatedImage(file);
         const url = URL.createObjectURL(blob);
         const correctedFile = await blob.arrayBuffer();
@@ -152,7 +153,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
         ]);
       }
     },
-    [setItems, setImages, setCorrectedFileArrayBuffer, setFiles]
+    [files]
   );
 
   const onSave = useCallback(async () => {
