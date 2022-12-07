@@ -87,7 +87,10 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   const generateVideo = useCallback(async () => {
     if (orderedItems.length === 0 || isGenerating) return;
     setIsGenerating(true);
-    await ffmpeg.load();
+
+    if (!ffmpeg.isLoaded()) {
+      await ffmpeg.load();
+    }
 
     ffmpeg.setProgress(({ ratio }) => {
       setProgress(parseFloat((ratio * 100).toFixed(1)));
