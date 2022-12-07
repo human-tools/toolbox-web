@@ -67,6 +67,8 @@ const QuickSignPDF = (): JSX.Element => {
   const pdfDrawRef = useRef<UseSvgDrawing>(null);
 
   const onDrop = useCallback(async (files) => {
+    pdfDrawRef.current?.clear();
+    setActivePage(1);
     const { bytes, doc: newDoc } = await createPDF(files);
     const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
     setDoc(newDoc);
@@ -83,7 +85,6 @@ const QuickSignPDF = (): JSX.Element => {
     const paths = Array.from(pathElements)
       .map((pathEl) => pathEl.getAttribute('d'))
       .filter((path) => !!path) as string[];
-
     const { bytes, doc: signedDoc } = await drawSvgPaths(
       doc,
       activePage,
@@ -159,7 +160,7 @@ const QuickSignPDF = (): JSX.Element => {
               <div className="flex p-3">
                 <div className="h-10 w-48">
                   <UploadButton onDrop={onDrop} accept=".pdf" fullSized={false}>
-                    <span className="text-base">Upload New Files</span>
+                    <span className="text-base">Upload New File</span>
                   </UploadButton>
                 </div>
                 <div>
