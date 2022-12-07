@@ -133,7 +133,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
     async (newFiles: File[]) => {
       const newFilesLength = newFiles.length + files.length;
       setFiles((oldFiles) => [...oldFiles, ...newFiles]);
-      console.log(newFilesLength);
       setItems(new Array(newFilesLength).fill(0).map((_, index) => index));
       for (const file of newFiles) {
         const blob = await Rotator.createRotatedImage(file);
