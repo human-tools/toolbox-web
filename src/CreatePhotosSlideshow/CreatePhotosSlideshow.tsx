@@ -131,7 +131,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
 
   const onDrop = useCallback(
     async (newFiles: File[]) => {
-      console.log('One !');
       const newFilesLength = newFiles.length + files.length;
       setFiles((oldFiles) => [...oldFiles, ...newFiles]);
       setItems(new Array(newFilesLength).fill(0).map((_, index) => index));
