@@ -14,6 +14,7 @@ This is the project that will include a collection of simple tools around the sa
 - [Split PDF](https://humantools.io/split-pdf) - This tool helps you to quickly split a large PDF file pages into a lot of single-file PDF files.
 - [Photos Slideshow](https://humantools.io/split-pdf) - This tool helps you to quickly turn your photos into a video slideshow.
 - [Images to PDF](https://humantools.io/images-to-pdf) - This tool helps you to quickly merge bunch of images into one PDF file.
+- [Quick Sign](https://humantools.io/quick-sign-pdf) - Quickly sign and add text to PDF files.
 
 # Deploying New Version
 
