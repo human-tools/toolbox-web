@@ -6,6 +6,7 @@ import CreatePhotosSlideshow from './CreatePhotosSlideshow/CreatePhotosSlideshow
 import Home from './Home/Home';
 import ImagesToPDF from './ImagesToPDF/ImagesToPDF';
 import workerContent from './pdfjs.worker.min.json';
+import QuickSignPDF from './QuickSignPDF/QuickSignPDF';
 import SplitPDF from './SplitPDF/SplitPDF';
 import ToolsNav from './ToolsNav/ToolsNav';
 
@@ -38,6 +39,9 @@ export const App = (): JSX.Element => {
                 </Route>
                 <Route path="/images-to-pdf" exact>
                   <ImagesToPDF />
+                </Route>
+                <Route path="/quick-sign-pdf" exact>
+                  <QuickSignPDF />
                 </Route>
                 <Route path="/*">
                   <div className="p-4 flex flex-col justify-center items-center content-center h-full">

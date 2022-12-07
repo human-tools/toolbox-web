@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 interface ToolsNavProps {
@@ -59,17 +58,16 @@ const ToolsNav = ({
         Images to PDF
       </NavLink>
 
+      <NavLink
+        exact
+        className={className}
+        activeClassName={activeClassName}
+        to="/quick-sign-pdf"
+      >
+        Quick Sign
+      </NavLink>
       {showTodo && (
         <>
-          <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
-            to="/quick-sign"
-          >
-            <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
-            Quick Sign
-          </NavLink>
           <NavLink
             exact
             className={className}
