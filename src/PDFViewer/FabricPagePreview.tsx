@@ -32,18 +32,7 @@ const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
 ): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [viewport, setViewport] = useState<PageViewport>();
-  // const drawingDivRef = useRef<HTMLDivElement>(null);
   const { editor, onReady } = useFabricJSEditor();
-  const onAddCircle = () => {
-    if (!editor) return;
-    editor.canvas.isDrawingMode = true;
-    editor.addCircle();
-  };
-  const onAddRectangle = () => {
-    if (!editor) return;
-    editor.addRectangle();
-  };
-
   useImperativeHandle(ref, () => editor!);
 
   const load = useCallback(async () => {
@@ -81,22 +70,12 @@ const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
         <FabricJSCanvas
           className="absolute top-0 right-0 left-0 bottom-0"
           onReady={(canvas) => {
-            // if (!canvas || !viewport) return;
-            // console.log(canvas);
             canvas.width = viewport!.width;
             canvas.height = viewport!.height;
             onReady(canvas);
           }}
         />
       )}
-      {/* <div
-        className="absolute top-0 right-0 left-0 bottom-0"
-        ref={renderRef}
-        style={{
-          width: viewport?.width,
-          height: viewport?.height,
-        }}
-      ></div> */}
     </div>
   );
 });
