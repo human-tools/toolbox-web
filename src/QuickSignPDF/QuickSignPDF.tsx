@@ -3,24 +3,22 @@
  * mechanism that overlay a drawable canvas over the PDF renderer canvas.
  *
  * Limitations:
- *  - Once the user hits Next/Previous the current page drawings are BURNED
- *    into the PDF page and can't be undo'd or cleared.
- *    We could fix this in future if we can figure out how to load existing paths
- *    into the svg drawer library we are using. (Once we figure it out we can store
- *    the current drawn paths in array until the user is ready to burn them)
+ *  - Once the user hits download the drawings are BURNED into the PDF pages and
+ *    humans can no longer draw on top of it. Not sure why this happens but it seems
+ *    it seems we can only burn onto the PDF once. Need investigation.
  *  - We can't currently control the scale of the PDF preview because it affects
  *    the scale the paths are affected in scaled and position.
  */
 
+import fabric from 'fabric';
+import { FabricJSEditor } from 'fabricjs-react';
 import { saveAs } from 'file-saver';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import UploadButton from '../components/UploadButton';
-import DrawablePagePreview, {
-  UseSvgDrawing,
-} from '../PDFViewer/DrawablePagePreview';
+import FabricPagePreview from '../PDFViewer/FabricPagePreview';
 
 async function createPDF(files: File[]) {
   const pdfDoc = await PDFDocument.create();
@@ -38,14 +36,42 @@ async function createPDF(files: File[]) {
   };
 }
 
-async function drawSvgPaths(
+async function drawFabricObjectsOnAllPages(
   pdfDoc: PDFDocument,
-  pageNumber: number,
-  paths: string[]
+  fabricObjects: { [index: number]: any }
 ) {
-  const page = pdfDoc.getPage(pageNumber - 1);
-  page.moveTo(0, page.getHeight());
-  paths.forEach((path) => page.drawSvgPath(path));
+  const pages = pdfDoc.getPages();
+  pages.forEach((page, index) => {
+    const json = fabricObjects[index + 1];
+    json?.objects.forEach((object: any) => {
+      switch (object.type) {
+        // TODO: Maybe add more annotations tools (circle/rect...);
+        case 'text':
+        case 'textbox':
+          page.drawText(object.text, {
+            x: object.left,
+            // Offsetting by 4px to match between the two drawer
+            // because I can't figure out where the offset between
+            // Fabric canvas and the PDF canvas drawing.
+            // page.getHeight() is used here to transform the y location
+            // since PDF coordinate space top-bottom is 0,0 vs fabric canvas
+            // which has top-left 0,0
+            y: page.getHeight() - object.top - object.height + 4,
+            lineHeight: object.lineHeight,
+            color: rgb(0, 0, 0),
+            size: object.fontSize * object.scaleX,
+          });
+          break;
+        case 'path':
+          page.moveTo(0, page.getHeight());
+          const path = object.path
+            .map((commandArr: (string | number)[]) => commandArr.join(' '))
+            .join(' ');
+          page.drawSvgPath(path);
+          break;
+      }
+    });
+  });
 
   return {
     bytes: await pdfDoc.save(),
@@ -58,82 +84,106 @@ const QuickSignPDF = (): JSX.Element => {
   const [doc, setDoc] = useState<PDFDocument>();
   const [activePage, setActivePage] = useState<number>(1);
   const [scale] = useState(1);
-  const [isSigning, setIsSigning] = useState<boolean>(false);
+  const [isDrawingMode, setIsDrawingMode] = useState<boolean>(false);
+  const [alreadyBurned, setAlreadyBurned] = useState<boolean>(false);
+
+  // Tracks all pages drawables so we can burn them to the PDF once the user
+  // click Sign & Download. This also allows humans to continue editing different
+  // pages.
+  const [pagesFabricObjects, setPagesFabricObjects] = useState<{
+    [index: number]: any;
+  }>({});
 
   const [fileName, setFileName] = useState<string>(
     `signed-pdfs-${new Date().getTime()}.pdf`
   );
 
-  const pdfDrawRef = useRef<UseSvgDrawing>(null);
+  const editorRef = useRef<FabricJSEditor>(null);
+
+  const updatePageObjects = useCallback(() => {
+    setPagesFabricObjects((currentPagesObjects) => {
+      if (!editorRef.current) return currentPagesObjects;
+      const objects = { ...currentPagesObjects };
+      objects[activePage] = editorRef.current.canvas.toJSON();
+      return objects;
+    });
+  }, [activePage]);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+    editorRef.current.canvas.loadFromJSON(
+      pagesFabricObjects[activePage],
+      () => {
+        console.log('JSON Loaded');
+      }
+    );
+  }, [activePage]);
 
   const onDrop = useCallback(async (files) => {
-    pdfDrawRef.current?.clear();
     setActivePage(1);
+    setPagesFabricObjects({});
+    setAlreadyBurned(false);
+    editorRef.current?.deleteAll();
     const { bytes, doc: newDoc } = await createPDF(files);
     const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
     setDoc(newDoc);
     setPDF(pdf);
   }, []);
 
-  const sign = useCallback(async () => {
+  const nextPage = useCallback(async () => {
+    if (!editorRef.current) return;
+    editorRef.current.deleteAll();
+    setActivePage((page) => Math.min(doc?.getPageCount() || 1, page + 1));
+  }, [doc]);
+
+  const prevPage = useCallback(async () => {
+    if (!editorRef.current) return;
+    editorRef.current.deleteAll();
+    setActivePage((page) => Math.max(1, page - 1));
+  }, []);
+
+  const signFabric = useCallback(async () => {
     if (!doc) return;
-    if (!pdfDrawRef.current) return;
-    const svg = pdfDrawRef.current.getSvgXML() as string;
-    const p = new DOMParser();
-    const d = p.parseFromString(svg, 'text/html');
-    const pathElements = d.querySelectorAll('svg path');
-    const paths = Array.from(pathElements)
-      .map((pathEl) => pathEl.getAttribute('d'))
-      .filter((path) => !!path) as string[];
-    const { bytes, doc: signedDoc } = await drawSvgPaths(
+    if (!editorRef.current) return;
+
+    const { bytes, doc: signedDoc } = await drawFabricObjectsOnAllPages(
       doc,
-      activePage,
-      paths
+      pagesFabricObjects
     );
+
     const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
+    setPagesFabricObjects({});
     setDoc(signedDoc);
     setPDF(pdf);
-  }, [activePage, doc]);
+  }, [doc, pagesFabricObjects]);
 
   const onSave = useCallback(async () => {
     if (!doc) return;
-    await sign();
-    pdfDrawRef.current?.clear();
+    if (!editorRef.current) return;
+    await signFabric();
+    setIsDrawingMode(false);
+    editorRef.current.deleteAll();
     const bytes = await doc.save();
     saveAs(
       new Blob([bytes]),
       fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`
     );
-  }, [doc, fileName, sign]);
+    setAlreadyBurned(true);
+  }, [doc, fileName, signFabric]);
 
-  // Add mouse events to draw location of the signature.
-
-  const nextPage = useCallback(async () => {
-    setIsSigning(true);
-    await sign();
-
-    // For some reason PDF lib is still busy after waiting for drawing PDFs
-    // This is hacky until we figure out how can we wait for the previous
-    // operation to finish.
-    setTimeout(() => {
-      pdfDrawRef.current?.clear();
-      setActivePage((page) => Math.min(doc?.getPageCount() || 1, page + 1));
-      setIsSigning(false);
-    }, 1000);
-  }, [doc, sign]);
-
-  const prevPage = useCallback(async () => {
-    setIsSigning(true);
-    await sign();
-    // For some reason PDF lib is still busy after waiting for drawing PDFs
-    // This is hacky until we figure out how can we wait for the previous
-    // operation to finish.
-    setTimeout(() => {
-      pdfDrawRef.current?.clear();
-      setActivePage((page) => Math.max(1, page - 1));
-      setIsSigning(false);
-    }, 1000);
-  }, [sign]);
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    function onMouseUp() {
+      updatePageObjects();
+    }
+    editor.canvas.on('mouse:up', onMouseUp);
+    editor.canvas.isDrawingMode = isDrawingMode;
+    return () => {
+      if (!editor) return;
+      editor.canvas.off('mouse:up', onMouseUp);
+    };
+  }, [isDrawingMode, updatePageObjects]);
 
   return (
     <div className="h-full flex flex-col">
@@ -163,35 +213,75 @@ const QuickSignPDF = (): JSX.Element => {
                     <span className="text-base">Upload New File</span>
                   </UploadButton>
                 </div>
-                <div>
-                  <button
-                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
-                    onClick={() => pdfDrawRef.current?.clear()}
-                  >
-                    Clear
-                  </button>
-                </div>
-                <div>
-                  <button
-                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
-                    onClick={() => pdfDrawRef.current?.undo()}
-                  >
-                    Undo
-                  </button>
-                </div>
+                {alreadyBurned && (
+                  <div>
+                    <div className="p-2 text-gray-500">
+                      Already finished signing. Upload New File to sign another
+                      document.
+                    </div>
+                  </div>
+                )}
+                {!alreadyBurned && (
+                  <>
+                    <div>
+                      <button
+                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                        onClick={() => {
+                          if (!editorRef.current) return;
+                          setIsDrawingMode(false);
+                          const text = new fabric.fabric.Textbox('Hello', {
+                            fontFamily: 'Helvetica',
+                            fontSize: 16,
+                            hasControls: false,
+                            width: 400,
+                          });
+                          editorRef.current.canvas.add(text);
+
+                          updatePageObjects();
+                        }}
+                      >
+                        Add Text
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                        onClick={() => {
+                          if (!editorRef.current) return;
+                          setIsDrawingMode((isDrawingMode) => !isDrawingMode);
+                        }}
+                      >
+                        {isDrawingMode ? 'Stop Drawing' : 'Start Drawing'}
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                        onClick={() => editorRef.current?.deleteAll()}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                        onClick={() => editorRef.current?.deleteSelected()}
+                      >
+                        Delete Selected
+                      </button>
+                    </div>
+                  </>
+                )}
+
                 <div className="flex-grow"></div>
                 <div>
                   <span className="px-2 text-gray-500">
                     Page ({activePage} of {doc?.getPageCount()})
                   </span>
                   <button
-                    disabled={
-                      isSigning ||
-                      !pdf ||
-                      activePage > (doc?.getPageCount() || 1)
-                    }
+                    disabled={!pdf || activePage > (doc?.getPageCount() || 1)}
                     className={`h-10 self-end text-white px-3 py-2 rounded-md mx-2 ${
-                      activePage <= 1 || isSigning
+                      activePage <= 1
                         ? 'bg-gray-200 cursor-not-allowed	'
                         : 'bg-green-500 hover:bg-green-700'
                     }`}
@@ -200,13 +290,9 @@ const QuickSignPDF = (): JSX.Element => {
                     <span>Previous</span>
                   </button>
                   <button
-                    disabled={
-                      isSigning ||
-                      !pdf ||
-                      activePage >= (doc?.getPageCount() || 1)
-                    }
+                    disabled={!pdf || activePage >= (doc?.getPageCount() || 1)}
                     className={`h-10 self-end text-white px-3 py-2 rounded-md ${
-                      activePage >= doc!.getPageCount() || isSigning
+                      activePage >= doc!.getPageCount()
                         ? 'bg-gray-200 cursor-not-allowed	'
                         : 'bg-green-500 hover:bg-green-700'
                     }`}
@@ -236,11 +322,11 @@ const QuickSignPDF = (): JSX.Element => {
               </div>
               {pdf && (
                 <div className="flex justify-center items-center">
-                  <DrawablePagePreview
+                  <FabricPagePreview
                     scale={scale}
                     pageNumber={activePage}
                     pdf={pdf}
-                    ref={pdfDrawRef}
+                    ref={editorRef}
                   />
                 </div>
               )}

@@ -1,3 +1,8 @@
+import {
+  FabricJSCanvas,
+  FabricJSEditor,
+  useFabricJSEditor,
+} from 'fabricjs-react';
 import { GlobalWorkerOptions } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
 import { PageViewport } from 'pdfjs-dist/types/display/display_utils';
@@ -9,8 +14,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useSvgDrawing } from 'react-hooks-svgdrawing';
-import { DrawingOption, SvgDrawing } from 'svg-drawing';
 import workerContent from '../pdfjs.worker.min.json';
 
 const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
@@ -23,37 +26,14 @@ interface Props {
   scale?: number;
 }
 
-export interface UseSvgDrawing {
-  instance: SvgDrawing | null;
-  clear: () => void;
-  undo: () => void;
-  changePenColor: (penColor: DrawingOption['penColor']) => void;
-  changePenWidth: (penwidth: DrawingOption['penWidth']) => void;
-  changeFill: (penColor: DrawingOption['fill']) => void;
-  changeClose: (penwidth: DrawingOption['close']) => void;
-  changeDelay: (penColor: DrawingOption['delay']) => void;
-  changeCurve: (penwidth: DrawingOption['curve']) => void;
-  getSvgXML: () => string | null;
-  download: (ext: 'svg' | 'png' | 'jpg') => void;
-}
-
-const DrawablePagePreview = forwardRef<UseSvgDrawing, Props>(function (
+const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
   { pdf, pageNumber, scale }: Props,
   ref
 ): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [viewport, setViewport] = useState<PageViewport>();
-  // const drawingDivRef = useRef<HTMLDivElement>(null);
-  const [renderRef, draw] = useSvgDrawing({
-    penWidth: 2, // pen width
-    penColor: '#000', // pen color
-    close: false, // Use close command for path. Default is false.
-    curve: true, // Use curve command for path. Default is true.
-    delay: 60, // Set how many ms to draw points every.
-    fill: 'none', // Set fill attribute for path. default is `none`
-  });
-
-  useImperativeHandle(ref, () => draw);
+  const { editor, onReady } = useFabricJSEditor();
+  useImperativeHandle(ref, () => editor!);
 
   const load = useCallback(async () => {
     const page = await pdf.getPage(pageNumber);
@@ -86,16 +66,18 @@ const DrawablePagePreview = forwardRef<UseSvgDrawing, Props>(function (
         height={viewport?.height}
       ></canvas>
       {/* Drawing Canvas */}
-      <div
-        className="absolute top-0 right-0 left-0 bottom-0"
-        ref={renderRef}
-        style={{
-          width: viewport?.width,
-          height: viewport?.height,
-        }}
-      ></div>
+      {viewport && (
+        <FabricJSCanvas
+          className="absolute top-0 right-0 left-0 bottom-0"
+          onReady={(canvas) => {
+            canvas.width = viewport!.width;
+            canvas.height = viewport!.height;
+            onReady(canvas);
+          }}
+        />
+      )}
     </div>
   );
 });
 
-export default DrawablePagePreview;
+export default FabricPagePreview;
