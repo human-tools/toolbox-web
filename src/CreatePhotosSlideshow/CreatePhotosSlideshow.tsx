@@ -1,12 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import UploadButton from '../components/UploadButton';
-import { createFFmpeg } from '@ffmpeg/ffmpeg';
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import Rotator from './Rotator';
 import { useSortable } from '@human-tools/use-sortable';
 import GridLoader from 'react-spinners/GridLoader';
+import { ChromePicker } from 'react-color';
 
-const getCleanName = (file: File): string => {
-  return file.name.replace(/([^a-zA-Z0-9]+)/gi, '-');
+const getCleanName = (fileName: string): string => {
+  return fileName.replace(/([^a-zA-Z0-9]+)/gi, '-');
 };
 
 interface ImagePreviewProps {
@@ -45,6 +46,32 @@ interface ImageData {
   height: number;
 }
 
+interface SlideshowConfig {
+  isBlured: boolean;
+  res: string;
+  background: string;
+}
+
+const SLIDESHOW_COMMAND = [
+  '-f',
+  'concat',
+  '-safe',
+  '0',
+  '-i',
+  'out.txt',
+  '-c:v',
+  'libx264',
+  '-r',
+  '30',
+  '-pix_fmt',
+  'yuv420p',
+];
+
+const ASPECT_RATIOS = {
+  '16:9': '1280:720',
+  '9:16': '720:1280',
+};
+
 const readImageSizing = (url: string) =>
   new Promise<{ width: number; height: number }>((resolve) => {
     const img = new Image();
@@ -67,9 +94,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [images, setImages] = useState<ImageData[]>([]);
-  const [correctedFileArrayBuffer, setCorrectedFileArrayBuffer] = useState<
-    ArrayBuffer[]
-  >([]);
+  const [shouldShowColorPicker, toggleColorPicker] = useState<boolean>(false);
   const {
     orderedItems,
     setItems,
@@ -81,8 +106,14 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   });
 
   const [fileName, setFileName] = useState<string>(
-    `photos-slideshow-${new Date().getTime()}.pdf`
+    `photos-slideshow-${new Date().getTime()}.mp4`
   );
+
+  const [config, setConfig] = useState<SlideshowConfig>({
+    isBlured: false,
+    res: ASPECT_RATIOS['16:9'],
+    background: '#000000',
+  });
 
   const generateVideo = useCallback(async () => {
     if (orderedItems.length === 0 || isGenerating) return;
@@ -96,41 +127,45 @@ const CreatePhotosSlideshow = (): JSX.Element => {
       setProgress(parseFloat((ratio * 100).toFixed(1)));
     });
 
-    for (const index of orderedItems) {
-      ffmpeg.FS(
-        'writeFile',
-        getCleanName(files[index]),
-        new Uint8Array(correctedFileArrayBuffer[index])
-      );
-    }
+    const inputPaths: Array<string> = [];
+    orderedItems.forEach(async (itemPosition, index) => {
+      const fileName = getCleanName(files[itemPosition].name);
+      inputPaths.push(`file ${fileName}\nduration 2`);
+      ffmpeg.FS('writeFile', fileName, await fetchFile(files[itemPosition]));
 
-    const ffconcatPath = 'slides.ffconcat';
-    const concatFileLines = ['ffconcat version 1.0']
-      .concat(
-        orderedItems.map((index) => {
-          const slideDuration = 1;
-          return `file ${getCleanName(
-            files[index]
-          )}\nduration ${slideDuration}`;
-        })
-      )
-      .join('\n');
+      // add the last file into the txt this is a quricky bug in ffmpeg
+      const isLastFile = index === orderedItems.length - 1;
+      if (isLastFile) {
+        inputPaths.push(`file ${fileName}`);
+      }
+    });
 
     ffmpeg.FS(
       'writeFile',
-      ffconcatPath,
-      Uint8Array.from(new TextEncoder().encode(concatFileLines))
+      'out.txt',
+      Uint8Array.from(new TextEncoder().encode(inputPaths.join('\n')))
     );
 
-    const slideShowWithPaddingAndBlurredBG = `-safe 0 -i ${ffconcatPath} -filter_complex format=yuv420p,rotate=2*PI,split[in_1][in_2];[in_1]scale='if(gt(a,1024/576),1000,-1)':'if(gt(a,1024/576),-1,526)':eval=frame[scaled_video];[scaled_video]format=rgba,pad=iw+50:ih+50:(ow-iw)/2:(oh-ih)/2:color=#00000000[padded_video];[in_2]scale=1024:576:force_original_aspect_ratio=increase,crop=1024:576,boxblur=20[bg];[bg][padded_video]overlay=(W-w-10)/2:(H-h-10)/2[out] -c:v libx264 -aspect 1024/576 -map [out] out.mp4 -y`;
-
-    await ffmpeg.run(...slideShowWithPaddingAndBlurredBG.split(' '));
+    const ffmpegRenderCommand = [...SLIDESHOW_COMMAND];
+    if (config.isBlured) {
+      ffmpegRenderCommand.push('-filter_complex');
+      ffmpegRenderCommand.push(`split [copy][original]; \ 
+        [copy] scale=${config.res}:force_original_aspect_ratio=increase,boxblur=20,crop=${config.res}[blured]; \
+        [original] scale=${config.res}:force_original_aspect_ratio=decrease[scaled_original]; \ 
+        [blured][scaled_original]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2`);
+    } else {
+      ffmpegRenderCommand.push('-vf');
+      ffmpegRenderCommand.push(`
+        scale=${config.res}:force_original_aspect_ratio=decrease,pad=${config.res}:(ow-iw)/2:(oh-ih)/2:${config.background}`);
+    }
+    ffmpegRenderCommand.push('out.mp4');
+    await ffmpeg.run(...ffmpegRenderCommand);
     const data = ffmpeg.FS('readFile', 'out.mp4');
     setVideoSrc(
       URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }))
     );
     setIsGenerating(false);
-  }, [correctedFileArrayBuffer, files, isGenerating, orderedItems]);
+  }, [files, isGenerating, orderedItems, config]);
 
   const onDrop = useCallback(
     async (newFiles: File[]) => {
@@ -140,7 +175,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
       for (const file of newFiles) {
         const blob = await Rotator.createRotatedImage(file);
         const url = URL.createObjectURL(blob);
-        const correctedFile = await blob.arrayBuffer();
         const { width, height } = await readImageSizing(url);
         setImages((images) => [
           ...images,
@@ -150,13 +184,9 @@ const CreatePhotosSlideshow = (): JSX.Element => {
             height,
           },
         ]);
-        setCorrectedFileArrayBuffer((correctedFileArrayBuffer) => [
-          ...correctedFileArrayBuffer,
-          correctedFile,
-        ]);
       }
     },
-    [setItems, setImages, setCorrectedFileArrayBuffer, setFiles, files]
+    [files]
   );
 
   const onSave = useCallback(async () => {
@@ -182,19 +212,58 @@ const CreatePhotosSlideshow = (): JSX.Element => {
         </p>
       </div>
       <div className="flex flex-grow flex-col h-full w-full lg:flex-row">
-        <div
-          className={`px-3 pb-3 ${
-            orderedItems.length === 0 ? 'flex-grow' : ''
-          }`}
-        >
-          <UploadButton
-            onDrop={onDrop}
-            accept="image/*"
-            fullSized={orderedItems.length === 0}
-          />
-        </div>
+        {orderedItems.length == 0 && (
+          <div className="px-3 pb-3 flex-grow">
+            <UploadButton
+              onDrop={onDrop}
+              accept="image/*"
+              fullSized={orderedItems.length === 0}
+            />
+          </div>
+        )}
         {orderedItems.length > 0 && (
           <div className="flex flex-col flex-grow m-3 lg:ml-0">
+            <div className="flex p-3">
+              <div className="h-10 w-48">
+                <UploadButton
+                  onDrop={onDrop}
+                  accept="image/*"
+                  fullSized={false}
+                >
+                  <span className="text-base">Upload New Image</span>
+                </UploadButton>
+              </div>
+              <div>
+                <button
+                  onClick={() => toggleColorPicker(!shouldShowColorPicker)}
+                  className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                >
+                  Pick Background Color
+                </button>
+                {shouldShowColorPicker ? (
+                  <div className="absolute z-20">
+                    <ChromePicker
+                      color={config.background}
+                      onChange={(color) =>
+                        setConfig({ ...config, background: color.hex })
+                      }
+                    />
+                  </div>
+                ) : null}
+              </div>
+              <div>
+                <button
+                  onClick={() =>
+                    setConfig(() => ({ ...config, isBlured: !config.isBlured }))
+                  }
+                  className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                >{`${
+                  !config.isBlured
+                    ? 'Enable Blur Background'
+                    : 'Disable Blur Background'
+                }`}</button>
+              </div>
+            </div>
             <div className="flex flex-col flex-grow-1 relative align-middle self-center">
               {!videoSrc && (
                 <div className="absolute text-center bg-black bg-opacity-50 text-white text-opacity-60 z-10 block w-full h-full flex flex-col items-center justify-center hover:text-opacity-100">
@@ -244,7 +313,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                   onChange={(e) => setFileName(e.target.value)}
                   type="text"
                   className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5 rounded-md border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
-                  placeholder="name-your-file.pdf"
+                  placeholder="name-your-file.mp4"
                 />
                 <button
                   className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
