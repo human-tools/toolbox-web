@@ -1,6 +1,7 @@
 import { GlobalWorkerOptions } from 'pdfjs-dist';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import buildtogether from './assets/buildtogether.png';
+import BulkEditPhotos from './BulkEditPhotos/BulkEditPhotos';
 import CombinePDF from './CombinePDF/CombinePDF';
 import CreatePhotosSlideshow from './CreatePhotosSlideshow/CreatePhotosSlideshow';
 import Home from './Home/Home';
@@ -42,6 +43,9 @@ export const App = (): JSX.Element => {
                 </Route>
                 <Route path="/quick-sign-pdf" exact>
                   <QuickSignPDF />
+                </Route>
+                <Route path="/bulk-edit-photos" exact>
+                  <BulkEditPhotos />
                 </Route>
                 <Route path="/*">
                   <div className="p-4 flex flex-col justify-center items-center content-center h-full">

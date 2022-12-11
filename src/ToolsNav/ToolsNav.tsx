@@ -66,6 +66,14 @@ const ToolsNav = ({
       >
         Quick Sign
       </NavLink>
+      <NavLink
+        exact
+        className={className}
+        activeClassName={activeClassName}
+        to="/bulk-edit-photos"
+      >
+        Bulk-Edit Photos
+      </NavLink>
       {showTodo && (
         <>
           <NavLink
@@ -94,15 +102,6 @@ const ToolsNav = ({
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
             Make GIF
-          </NavLink>
-          <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
-            to="/bulk-edit-photos"
-          >
-            <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
-            Bulk-Edit Photos
           </NavLink>
           <NavLink
             exact
