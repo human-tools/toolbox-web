@@ -1,61 +1,14 @@
-import React, { useCallback, useState } from 'react';
-import UploadButton from '../components/UploadButton';
 import { createFFmpeg } from '@ffmpeg/ffmpeg';
-import Rotator from './Rotator';
 import { useSortable } from '@human-tools/use-sortable';
-import GridLoader from 'react-spinners/GridLoader';
+import { useCallback, useState } from 'react';
+import UploadButton from '../components/UploadButton';
+import { readImageSizing } from '../images/helpers';
+import { ImageData, ImagePreview } from '../images/ImagePreview';
+import Rotator from './Rotator';
 
 const getCleanName = (file: File): string => {
   return file.name.replace(/([^a-zA-Z0-9]+)/gi, '-');
 };
-
-interface ImagePreviewProps {
-  image?: ImageData;
-}
-
-const ImagePreview = ({ image }: ImagePreviewProps) => {
-  return (
-    <div className="flex h-full justify-center items-center">
-      <div className="shadow-sm m-0.5">
-        {image ? (
-          <img
-            src={image.url}
-            className="h-40 inline-block pointer-events-none"
-          />
-        ) : (
-          <div className="h-40 w-32 flex justify-center items-center">
-            <div className="w-9 transform scale-75">
-              <GridLoader
-                color={'#BFDBFE'}
-                loading={true}
-                size={8}
-                margin="5px"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-interface ImageData {
-  url: string;
-  width: number;
-  height: number;
-}
-
-const readImageSizing = (url: string) =>
-  new Promise<{ width: number; height: number }>((resolve) => {
-    const img = new Image();
-    img.onload = function () {
-      resolve({
-        width: img.width,
-        height: img.height,
-      });
-    };
-    img.src = url;
-  });
 
 const ffmpeg = createFFmpeg({
   log: true,
@@ -81,7 +34,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   });
 
   const [fileName, setFileName] = useState<string>(
-    `photos-slideshow-${new Date().getTime()}.pdf`
+    `photos-slideshow-${new Date().getTime()}.mp4`
   );
 
   const generateVideo = useCallback(async () => {
