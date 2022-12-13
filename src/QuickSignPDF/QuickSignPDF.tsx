@@ -87,7 +87,7 @@ const QuickSignPDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
   const [activePage, setActivePage] = useState<number>(1);
-  const [scale] = useState(1);
+  const [scale, setScale] = useState(1);
   const [isDrawingMode, setIsDrawingMode] = useState<boolean>(false);
 
   // Tracks all pages drawables so we can burn them to the PDF once the user
@@ -295,8 +295,7 @@ const QuickSignPDF = (): JSX.Element => {
                     Next
                   </button>
                 </div>
-                {/* TODO(fix): Page scale would affect the drawn SVG scales and position */}
-                {/* <div>
+                <div>
                   <span className="px-2 text-gray-500">Page Size</span>
                   <button
                     className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
@@ -312,7 +311,7 @@ const QuickSignPDF = (): JSX.Element => {
                   >
                     Larger
                   </button>
-                </div> */}
+                </div>
               </div>
               {pdf && (
                 <div className="flex justify-center items-center">
