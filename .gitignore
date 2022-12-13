@@ -26,3 +26,6 @@ yarn-error.log*
 /src/assets/main.generated.css
 # Hack around pdf.js worker file not loading well with esmodules.
 /src/pdfjs.worker.min.json
+
+# Local Netlify folder
+.netlify
