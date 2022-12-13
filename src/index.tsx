@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import 'react-image-crop/dist/ReactCrop.css';
 import './assets/main.generated.css';
 
 ReactDOM.render(

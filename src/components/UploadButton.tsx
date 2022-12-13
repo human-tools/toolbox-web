@@ -28,7 +28,7 @@ function UploadButton({
           !fullSized
             ? 'flex-row h-full p-5 text-md lg:text-xl lg:flex-col'
             : 'h-full w-full p-10 text-xl flex-col lg:text-3xl lg:flex-row'
-        } items-center justify-center  bg-blue-100 rounded text-center text-blue-900  hover:bg-blue-200 hover:text-white hover:cursor-pointer`}
+        } items-center justify-center  bg-blue-100 text-center text-blue-900  hover:bg-blue-200 hover:text-white hover:cursor-pointer`}
       >
         <input {...getInputProps()} accept={accept} />
         {children && children}
