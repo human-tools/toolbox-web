@@ -2,7 +2,6 @@ import JSZip from 'jszip';
 import { doc } from 'prettier';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import UploadButton from '../components/UploadButton';
-import Rotator from '../CreatePhotosSlideshow/Rotator';
 import { readImageSizing } from '../images/helpers';
 import {
   CanvasEditorRef,
@@ -43,8 +42,10 @@ const BulkEditPhotos = (): JSX.Element => {
       setFiles((oldFiles) => [...oldFiles, ...newFiles]);
       const newImages = [...images];
       for (const file of newFiles) {
-        const blob = await Rotator.createRotatedImage(file);
-        const url = URL.createObjectURL(blob);
+        // Dropping fixing rotation of images because it is slow.
+        // Instead leave that to the user to fix with the rotation tool.
+        // const blob = await Rotator.createRotatedImage(file);
+        const url = URL.createObjectURL(file);
         const { width, height } = await readImageSizing(url);
         newImages.push({
           // TODO: Add a uid for finding the correct image.
@@ -182,6 +183,8 @@ const BulkEditPhotos = (): JSX.Element => {
                       <button
                         className="h-10 self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
                         onClick={() => {
+                          // Update crops before switching to another tool.
+                          onCrop();
                           setActiveTool('frame');
                         }}
                       >
