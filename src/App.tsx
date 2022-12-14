@@ -23,8 +23,8 @@ export const App = (): JSX.Element => {
           <div className="flex-grow-0 mx-2 mt-3">
             <ToolsNav showTodo={false} />
           </div>
-          <div className="flex-grow">
-            <div className="bg-white h-full shadow-md rounded-b">
+          <div className="flex-grow mx-2 mb-2">
+            <div className="bg-white h-full shadow-sm rounded-b">
               <Switch>
                 <Route path="/" exact>
                   <Home />

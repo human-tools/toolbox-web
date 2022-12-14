@@ -100,7 +100,7 @@ export const ImageCanvasEditor = forwardRef<
   }, [blur, brightness, contrast, frame.bottom, frame.left, frame.right, frame.top, grayscale, hueRotation, invert, opacity, saturation, sepia, srcCanvas]);
   return (
     <div className="flex justify-center">
-      <div className="shadow-md m-0.5">
+      <div className="m-0.5">
         {srcCanvas ? (
           <canvas
             ref={canvasRef}

@@ -119,22 +119,10 @@ const GeneratePDFFromImages = (): JSX.Element => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="m-3 p-3 bg-green-200 rounded">
-        <p>
-          This tool helps you to quickly merge bunch of images into one PDF
-          file.{' '}
-          <b>
-            No Data is ever uploaded to any servers. All the magic happen in
-            your browser.
-          </b>{' '}
-          Just drag-and-drop some images, re-order your pages as you'd like and
-          and then download the file!
-        </p>
-      </div>
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
           {!pdf && (
-            <div className="px-3 pb-3 flex-grow ">
+            <div className="px-3 py-3 flex-grow ">
               <UploadButton
                 onDrop={onDrop}
                 accept=".png,.jpg,.jpeg"

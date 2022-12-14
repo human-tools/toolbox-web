@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
-import { PDFDocument } from 'pdf-lib';
 import { saveAs } from 'file-saver';
-import UploadButton from '../components/UploadButton';
 import JSZip from 'jszip';
+import { PDFDocument } from 'pdf-lib';
+import { useCallback } from 'react';
+import UploadButton from '../components/UploadButton';
 
 async function splitPDF(largePdfFile: File): Promise<PDFDocument[]> {
   const sourceDoc = await PDFDocument.load(await largePdfFile.arrayBuffer());
@@ -33,21 +33,9 @@ const SplitPDF = (): JSX.Element => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="m-3 p-3 bg-green-200 rounded">
-        <p>
-          This tool helps you to quickly split a large PDF file pages into a lot
-          of single-file PDF files.{' '}
-          <b>
-            No Data is ever uploaded to any servers. All the magic happen in
-            your browser.
-          </b>{' '}
-          Just drag-and-drop a PDF file, it will get split and then download the
-          files!
-        </p>
-      </div>
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
-          <div className="px-3 pb-3 flex-grow ">
+          <div className="px-3 py-3 flex-grow ">
             <UploadButton onDrop={onDrop} accept=".pdf" fullSized={true} />
           </div>
         </div>
