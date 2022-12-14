@@ -1,11 +1,11 @@
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import { useSortable } from '@human-tools/use-sortable';
 import { useCallback, useState } from 'react';
+import { ChromePicker } from 'react-color';
 import UploadButton from '../components/UploadButton';
 import { readImageSizing } from '../images/helpers';
 import { ImageData, ImagePreview } from '../images/ImagePreview';
 import Rotator from './Rotator';
-import { ChromePicker } from 'react-color';
 
 const getCleanName = (fileName: string): string => {
   return fileName.replace(/([^a-zA-Z0-9]+)/gi, '-');
@@ -154,20 +154,9 @@ const CreatePhotosSlideshow = (): JSX.Element => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="m-3 p-3 bg-green-200 rounded">
-        <p>
-          This tool helps you to quickly turn your photos into a video
-          slideshow.{' '}
-          <b>
-            No Data is ever uploaded to any servers. All the magic happen in
-            your browser.
-          </b>{' '}
-          Just drag-and-drop some photos and wait for the magic.
-        </p>
-      </div>
       <div className="flex flex-grow flex-col h-full w-full lg:flex-row">
         {orderedItems.length == 0 && (
-          <div className="px-3 pb-3 flex-grow">
+          <div className="px-3 py-3 flex-grow">
             <UploadButton
               onDrop={onDrop}
               accept="image/*"

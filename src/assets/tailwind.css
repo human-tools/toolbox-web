@@ -1,5 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@100;300;900&display=swap');
+
 @tailwind base;
 
 @tailwind components;
 
 @tailwind utilities;
+
+
+body {
+  font-family: 'Fira Sans';
+}

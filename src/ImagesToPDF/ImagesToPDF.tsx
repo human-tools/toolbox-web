@@ -1,16 +1,14 @@
-import { useCallback, useState } from 'react';
-import { PDFDocument, PDFImage } from 'pdf-lib';
+import { useSortable } from '@human-tools/use-sortable';
 import { saveAs } from 'file-saver';
+import { PDFDocument, PDFImage } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import PagePreview from '../PDFViewer/PagePreview';
-import { useSortable } from '@human-tools/use-sortable';
+import { useCallback, useState } from 'react';
 import UploadButton from '../components/UploadButton';
+import PagePreview from '../PDFViewer/PagePreview';
 
 async function generatePDF(files: File[], addToDoc?: PDFDocument) {
-  console.log(files, addToDoc);
   const pdfDoc = addToDoc ? addToDoc : await PDFDocument.create();
-  console.log(pdfDoc);
 
   for (const file of files) {
     let image: PDFImage | undefined = undefined;
@@ -98,21 +96,9 @@ const GeneratePDFFromImages = (): JSX.Element => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="m-3 p-3 bg-green-200 rounded">
-        <p>
-          This tool helps you to quickly merge bunch of images into one PDF
-          file.{' '}
-          <b>
-            No Data is ever uploaded to any servers. All the magic happen in
-            your browser.
-          </b>{' '}
-          Just drag-and-drop some images, re-order your pages as you'd like and
-          and then download the file!
-        </p>
-      </div>
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
-          <div className="px-3 pb-3 flex-grow ">
+          <div className="px-3 py-3 flex-grow ">
             <UploadButton
               onDrop={onDrop}
               accept=".png,.jpg,.jpeg"

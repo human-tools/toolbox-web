@@ -119,7 +119,7 @@ const BulkEditPhotos = (): JSX.Element => {
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
           {images.length === 0 && (
-            <div className="px-3 pb-3 flex-grow ">
+            <div className="px-3 py-3 flex-grow ">
               <UploadButton
                 onDrop={onDrop}
                 accept="image/*"

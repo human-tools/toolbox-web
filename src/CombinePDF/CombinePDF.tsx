@@ -102,17 +102,6 @@ const CombinePDF = (): JSX.Element => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="m-3 p-3 bg-green-200 rounded">
-        <p>
-          This tool helps you to quickly merge bunch of PDF files into one.{' '}
-          <b>
-            No Data is ever uploaded to any servers. All the magic happen in
-            your browser.
-          </b>{' '}
-          Just drag-and-drop some PDF files, re-order your pages as you'd like
-          and then download the file!
-        </p>
-      </div>
       {previewPageNumber && pdf && (
         <div className="flex justify-center items-center absolute h-full w-full bg-black bg-opacity-60 z-20 top-0 overflow-auto">
           <button
@@ -127,7 +116,7 @@ const CombinePDF = (): JSX.Element => {
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
           {!pdf && (
-            <div className="px-3 pb-3 flex-grow ">
+            <div className="px-3 py-3 flex-grow ">
               <UploadButton onDrop={onDrop} accept=".pdf" fullSized={!pdf} />
             </div>
           )}

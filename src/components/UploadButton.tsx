@@ -1,6 +1,6 @@
+import { ArrowUpCircleIcon } from '@heroicons/react/24/solid';
 import React, { ReactElement } from 'react';
 import { DropEvent, FileRejection, useDropzone } from 'react-dropzone';
-import dragdrop from '../assets/dragdrop.png';
 
 interface Props {
   onDrop: <T extends File>(
@@ -26,26 +26,25 @@ function UploadButton({
         {...getRootProps()}
         className={`flex box-border  ${
           !fullSized
-            ? 'flex-row h-full p-5 text-md lg:text-xl lg:flex-col'
-            : 'h-full w-full p-10 text-xl flex-col lg:text-3xl lg:flex-row'
-        } items-center justify-center  bg-blue-100 text-center text-blue-900  hover:bg-blue-200 hover:text-white hover:cursor-pointer`}
+            ? 'flex-row h-full p-5 text-md lg:text-lg lg:flex-col'
+            : 'h-full w-full p-10 text-md flex-col lg:text-lg lg:flex-row hover:border-2'
+        } items-center justify-center bg-gray-50 border border-dashed text-center text-gray-400  hover:bg-blue-50 hover:text-gray-500 hover:cursor-pointer`}
       >
         <input {...getInputProps()} accept={accept} />
         {children && children}
         {!children && (
-          <div>
-            <img
-              src={dragdrop}
-              className={`${
-                !fullSized
-                  ? 'w-20 lg:w-auto lg:max-w-sm lg:mb-20'
-                  : 'max-w-xs lg:max-w-xl mb-10 lg:mb-0 lg:mr-20'
-              }`}
-            />
+          <div className="flex flex-col items-center">
+            <div className="bg-gray-100 flex items-center justify-center p-8 rounded-full mb-5">
+              <span>
+                <ArrowUpCircleIcon className="h-8" />
+              </span>
+            </div>
             {isDragActive ? (
               <p>Drop the files here ...</p>
             ) : (
-              <p>Drag 'n' drop some files here, or click to select files</p>
+              <p>
+                <span className="text-blue-500">Browse</span> or Drag files here
+              </p>
             )}
           </div>
         )}
