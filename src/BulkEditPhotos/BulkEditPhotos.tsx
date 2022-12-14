@@ -17,6 +17,7 @@ import {
   DEFAULT_SATURATION,
   DEFAULT_SEPIA,
   DEFAULT_TOP,
+  SOCIAL_PHOTO_SIZES,
 } from '../images/defaults';
 import { readImageSizing } from '../images/helpers';
 import {
@@ -195,7 +196,7 @@ const BulkEditPhotos = (): JSX.Element => {
                       </button>
                     </div>{' '}
                     {activeTool === 'crop' && (
-                      <div className="flex items-center bg-gray-500 px-2 py-4">
+                      <div className="flex flex-col items-start bg-gray-500 px-2 py-4">
                         <div>
                           <button
                             className="h-8 text-xs self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
@@ -206,26 +207,27 @@ const BulkEditPhotos = (): JSX.Element => {
                             Toggle Aspect
                           </button>
                         </div>{' '}
-                        <div>
-                          <button
-                            className="h-8 text-xs self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
-                            onClick={() => {
-                              setAspect(9 / 16);
-                            }}
-                          >
-                            Insta Story
-                          </button>
+                        <div className="text-white font-bold">
+                          Popular Sizes
                         </div>
-                        <div>
-                          <button
-                            className="h-8 text-xs self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
-                            onClick={() => {
-                              setAspect(1);
-                            }}
-                          >
-                            Insta Post
-                          </button>
-                        </div>
+                        {SOCIAL_PHOTO_SIZES.map((size) => (
+                          <div className="w-full">
+                            <button
+                              className="h-8 text-xs self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2 w-full text-left"
+                              onClick={() => {
+                                setAspect(size.width / size.height);
+                              }}
+                            >
+                              <div className="flex">
+                                <span>{size.label}</span>
+                                <span className="flex-grow"></span>{' '}
+                                <span>
+                                  {size.width}x{size.height}
+                                </span>
+                              </div>
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
