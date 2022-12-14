@@ -15,6 +15,7 @@ interface Props {
   aspect?: number;
   image: ImageData;
   onCrop?: () => void;
+  previewSize?: number;
 }
 
 function centerAspectCrop(
@@ -43,7 +44,7 @@ export interface PhotoCropperRef {
 }
 
 const PhotoCropper = forwardRef<PhotoCropperRef, Props>(function (
-  { image, onCrop, aspect },
+  { image, onCrop, aspect, previewSize = 250 },
   ref
 ): JSX.Element {
   const [crop, setCrop] = useState<Crop>();
@@ -154,8 +155,11 @@ const PhotoCropper = forwardRef<PhotoCropperRef, Props>(function (
           ref={imgRef}
           alt="Crop me"
           src={image.url}
-          style={{ transform: `scale(${scale}) rotate(${rotate}deg)` }}
-          className="h-40 block pointer-events-none"
+          style={{
+            transform: `scale(${scale}) rotate(${rotate}deg)`,
+            height: previewSize,
+          }}
+          className="block pointer-events-none"
         />
       </ReactCrop>
       {/* Toolbar */}
