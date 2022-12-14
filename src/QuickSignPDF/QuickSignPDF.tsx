@@ -19,6 +19,7 @@ import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import UploadButton from '../components/UploadButton';
 import FabricPagePreview from '../PDFViewer/FabricPagePreview';
+import PagePreview from '../PDFViewer/PagePreview';
 
 async function createPDF(files: File[]) {
   const pdfDoc = await PDFDocument.create();
@@ -143,6 +144,15 @@ const QuickSignPDF = (): JSX.Element => {
     editorRef.current.deleteAll();
     setActivePage((page) => Math.max(1, page - 1));
   }, []);
+
+  const goToSelectedPage = useCallback(
+    async (selectedPageNumber) => {
+      if (!editorRef.current || selectedPageNumber == activePage) return;
+      editorRef.current.deleteAll();
+      setActivePage(selectedPageNumber);
+    },
+    [activePage]
+  );
 
   const signFabric = useCallback(async () => {
     if (!doc) return;
@@ -314,7 +324,23 @@ const QuickSignPDF = (): JSX.Element => {
                 </div>
               </div>
               {pdf && (
-                <div className="flex justify-center items-center">
+                <div className="flex flex-row justify-center">
+                  <div className="flex flex-col max-h-screen overflow-auto">
+                    {new Array(pdf.numPages).fill(0).map((_, index) => (
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => goToSelectedPage(index + 1)}
+                      >
+                        <PagePreview
+                          scale={0.25}
+                          key={index + 1}
+                          pageNumber={index + 1}
+                          pdf={pdf}
+                        />
+                        <div className="mb-8 text-center"> {index + 1} </div>
+                      </div>
+                    ))}
+                  </div>
                   <FabricPagePreview
                     scale={scale}
                     pageNumber={activePage}
