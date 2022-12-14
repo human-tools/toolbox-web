@@ -22,13 +22,14 @@ interface Props {
 function centerAspectCrop(
   mediaWidth: number,
   mediaHeight: number,
-  aspect: number
+  aspect: number,
+  width = 100
 ) {
   return centerCrop(
     makeAspectCrop(
       {
         unit: 'px',
-        width: 100,
+        width,
       },
       aspect,
       mediaWidth,
@@ -63,6 +64,14 @@ const PhotoCropper = forwardRef<PhotoCropperRef, Props>(function (
       throw new Error('No 2d context');
     }
 
+    const cropWidth =
+      crop.unit === 'px'
+        ? crop.width
+        : (crop.width / 100) * imageEl.naturalWidth;
+    const cropHeight =
+      crop.unit === 'px'
+        ? crop.height
+        : (crop.height / 100) * imageEl.naturalHeight;
     const scaleX = imageEl.naturalWidth / imageEl.width;
     const scaleY = imageEl.naturalHeight / imageEl.height;
     // devicePixelRatio slightly increases sharpness on retina devices
@@ -73,11 +82,11 @@ const PhotoCropper = forwardRef<PhotoCropperRef, Props>(function (
     // const pixelRatio = 1;
 
     canvas.width = Math.min(
-      Math.floor(crop.width * scaleX),
+      Math.floor(cropWidth * scaleX),
       imageEl.naturalWidth
     );
     canvas.height = Math.min(
-      Math.floor(crop.height * scaleY),
+      Math.floor(cropHeight * scaleY),
       imageEl.naturalHeight
     );
 
@@ -136,10 +145,15 @@ const PhotoCropper = forwardRef<PhotoCropperRef, Props>(function (
       return onCrop && onCrop();
     }
     setCrop(
-      centerAspectCrop(imgRef.current.width, imgRef.current.height, aspect)
+      centerAspectCrop(
+        imgRef.current.width,
+        imgRef.current.height,
+        aspect,
+        previewSize / 1.1
+      )
     );
     onCrop && onCrop();
-  }, [aspect, onCrop]);
+  }, [aspect, onCrop, previewSize]);
   return (
     <div className="flex flex-col items-start">
       <ReactCrop
