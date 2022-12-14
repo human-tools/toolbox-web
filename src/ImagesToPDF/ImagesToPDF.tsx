@@ -1,5 +1,5 @@
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState } from 'react';
 import { PDFDocument, PDFImage } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { getDocument } from 'pdfjs-dist';
