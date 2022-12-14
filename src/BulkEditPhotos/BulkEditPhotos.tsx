@@ -129,10 +129,10 @@ const BulkEditPhotos = (): JSX.Element => {
           )}
 
           {images.length > 0 && (
-            <div className="flex flex-grow m-3 lg:ml-0">
+            <div className="flex flex-grow p-3 lg:ml-0">
               {/* Sidebar */}
               <div className="flex flex-col p-3 bg-gray-800 w-96">
-                <div className="flex w-full">
+                <div className="flex w-full mb-2">
                   <div className="h-10 w-48">
                     <UploadButton
                       onDrop={onDrop}
@@ -146,7 +146,7 @@ const BulkEditPhotos = (): JSX.Element => {
                   <div className="flex items-center">
                     <div>
                       <button
-                        className="h-5 self-end bg-green-500 text-white px-1 hover:bg-green-700 mr-2"
+                        className="h-5 self-end bg-gray-500 text-white px-1 hover:bg-green-700 mr-2"
                         onClick={() => {
                           setPreviewSize((previewSize) => previewSize / 1.2);
                         }}
@@ -156,7 +156,7 @@ const BulkEditPhotos = (): JSX.Element => {
                     </div>{' '}
                     <div>
                       <button
-                        className="h-8 self-end bg-green-500 text-white px-1 hover:bg-green-700"
+                        className="h-8 self-end bg-gray-500 text-white px-1 hover:bg-green-700"
                         onClick={() => {
                           setPreviewSize((previewSize) => previewSize * 1.2);
                         }}
@@ -171,7 +171,7 @@ const BulkEditPhotos = (): JSX.Element => {
                   <div className="flex flex-col my-2">
                     <div>
                       <button
-                        className="h-10 self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
+                        className="h-10 self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
                         onClick={() => {
                           setActiveTool('crop');
                         }}
@@ -180,10 +180,10 @@ const BulkEditPhotos = (): JSX.Element => {
                       </button>
                     </div>{' '}
                     {activeTool === 'crop' && (
-                      <div className="flex items-center bg-green-500">
+                      <div className="flex items-center bg-gray-500 px-2 py-4">
                         <div>
                           <button
-                            className="h-8 text-xs self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
+                            className="h-8 text-xs self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
                             onClick={() => {
                               setAspect((aspect) => (aspect ? undefined : 1));
                             }}
@@ -193,7 +193,7 @@ const BulkEditPhotos = (): JSX.Element => {
                         </div>{' '}
                         <div>
                           <button
-                            className="h-8 text-xs self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
+                            className="h-8 text-xs self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
                             onClick={() => {
                               setAspect(9 / 16);
                             }}
@@ -203,7 +203,7 @@ const BulkEditPhotos = (): JSX.Element => {
                         </div>
                         <div>
                           <button
-                            className="h-8 text-xs self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
+                            className="h-8 text-xs self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
                             onClick={() => {
                               setAspect(1);
                             }}
@@ -218,7 +218,7 @@ const BulkEditPhotos = (): JSX.Element => {
                   <div className="flex flex-col my-2">
                     <div>
                       <button
-                        className="h-10 self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
+                        className="h-10 self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
                         onClick={() => {
                           // Update crops before switching to another tool.
                           onCrop();
@@ -229,7 +229,7 @@ const BulkEditPhotos = (): JSX.Element => {
                       </button>
                     </div>{' '}
                     {activeTool === 'frame' && (
-                      <div className="flex flex-wrap items-center bg-green-500">
+                      <div className="flex flex-wrap items-center bg-gray-500  px-2 py-4">
                         <div>
                           <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
                             <label
@@ -323,7 +323,7 @@ const BulkEditPhotos = (): JSX.Element => {
                   <div className="flex flex-col my-2">
                     <div>
                       <button
-                        className="h-10 self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
+                        className="h-10 self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
                         onClick={() => {
                           // Update crops before switching to another tool.
                           onCrop();
@@ -334,7 +334,7 @@ const BulkEditPhotos = (): JSX.Element => {
                       </button>
                     </div>{' '}
                     {activeTool === 'adjust' && (
-                      <div className="flex flex-wrap items-center bg-green-500">
+                      <div className="flex flex-wrap items-center bg-gray-500 px-2 py-4">
                         <div>
                           <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
                             <label
@@ -551,7 +551,7 @@ const BulkEditPhotos = (): JSX.Element => {
                     placeholder="name-your-file.zip"
                   />
                   <button
-                    className="h-10 self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700"
+                    className="h-10 self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700"
                     onClick={onSave}
                   >
                     Download
@@ -560,7 +560,7 @@ const BulkEditPhotos = (): JSX.Element => {
               </div>
 
               <div
-                className={`flex flex-wrap flex-grow-1 h-full items-start content-start justify-start lg:justify-start ${
+                className={`flex flex-wrap flex-grow-1 h-full items-start content-start justify-start px-1  lg:justify-start ${
                   activeTool !== 'crop' ? 'hidden' : 'visible'
                 }`}
               >
@@ -580,7 +580,7 @@ const BulkEditPhotos = (): JSX.Element => {
               </div>
 
               <div
-                className={`flex flex-wrap flex-grow-1 h-full items-start content-start justify-start lg:justify-start ${
+                className={`flex flex-wrap flex-grow-1 h-full items-start content-start justify-start px-1 lg:justify-start ${
                   ['frame', 'adjust'].includes(activeTool)
                     ? 'visible'
                     : 'hidden'
@@ -588,7 +588,7 @@ const BulkEditPhotos = (): JSX.Element => {
               >
                 {croppedCanvases.map((canvas, index) => {
                   return (
-                    <div key={index} className="m-1">
+                    <div key={index} className="m-1 shadow-md">
                       {canvas && (
                         <ImageCanvasEditor
                           ref={(ref) => registerCanvasEditorRef(ref, index)}
