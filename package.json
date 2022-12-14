@@ -15,6 +15,7 @@
     "pdf-lib": "^1.16.0",
     "pdfjs-dist": "^2.6.347",
     "react": "^17.0.1",
+    "react-color": "^2.19.3",
     "react-dom": "^17.0.1",
     "react-dropzone": "^11.3.1",
     "react-image-crop": "^10.0.9",
@@ -27,6 +28,7 @@
   },
   "scripts": {
     "start": "BUILD_TARGET=dev npm run watch:css && npm run updatepdfjsworker && react-scripts start",
+    "format": "prettier --write \"src/**/*.{js,jsx,tsx}\"",
     "build": "npm run watch:css && npm run updatepdfjsworker && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -56,6 +58,7 @@
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.7.1",
+    "@types/react-color": "^3.0.6",
     "@types/fabric": "^4.5.14",
     "@types/file-saver": "^2.0.1",
     "@types/jest": "^26.0.20",
