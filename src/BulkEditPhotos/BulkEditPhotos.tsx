@@ -10,7 +10,7 @@ import {
 import { ImageData } from '../images/ImagePreview';
 import PhotoCropper, { PhotoCropperRef } from '../images/PhotoCropper';
 
-type Tool = 'crop' | 'frame';
+type Tool = 'crop' | 'frame' | 'adjust';
 
 const BulkEditPhotos = (): JSX.Element => {
   // TODO: use original files to make sure we save files with their correct file extension.
@@ -30,6 +30,15 @@ const BulkEditPhotos = (): JSX.Element => {
   const [right, setRight] = useState(0);
   const [left, setLeft] = useState(0);
   const [activeTool, setActiveTool] = useState<Tool>('crop');
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [blur, setBlur] = useState(0);
+  const [grayscale, setGrayscale] = useState(0);
+  const [hueRotation, setHueRotation] = useState(0);
+  const [invert, setInvert] = useState(0);
+  const [opacity, setOpacity] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+  const [sepia, setSepia] = useState(0);
 
   const onCrop = useCallback(() => {
     const croppedCanvases = cropperRefs.current.map((cropper) => {
@@ -131,6 +140,7 @@ const BulkEditPhotos = (): JSX.Element => {
                   </UploadButton>
                 </div>
                 <div className="flex flex-col">
+                  {/* Crops */}
                   <div className="flex flex-col my-2">
                     <div>
                       <button
@@ -142,7 +152,6 @@ const BulkEditPhotos = (): JSX.Element => {
                         Crop
                       </button>
                     </div>{' '}
-                    {/* Crops */}
                     {activeTool === 'crop' && (
                       <div className="flex items-center bg-green-500">
                         <div>
@@ -178,6 +187,7 @@ const BulkEditPhotos = (): JSX.Element => {
                       </div>
                     )}
                   </div>
+                  {/* Framing */}
                   <div className="flex flex-col my-2">
                     <div>
                       <button
@@ -191,7 +201,6 @@ const BulkEditPhotos = (): JSX.Element => {
                         Frame
                       </button>
                     </div>{' '}
-                    {/* Crops */}
                     {activeTool === 'frame' && (
                       <div className="flex flex-wrap items-center bg-green-500">
                         <div>
@@ -283,6 +292,228 @@ const BulkEditPhotos = (): JSX.Element => {
                       </div>
                     )}
                   </div>
+                  {/* Adjust */}
+                  <div className="flex flex-col my-2">
+                    <div>
+                      <button
+                        className="h-10 self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700 mr-2"
+                        onClick={() => {
+                          // Update crops before switching to another tool.
+                          onCrop();
+                          setActiveTool('adjust');
+                        }}
+                      >
+                        Adjust
+                      </button>
+                    </div>{' '}
+                    {activeTool === 'adjust' && (
+                      <div className="flex flex-wrap items-center bg-green-500">
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Brightness</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{brightness}%</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={300}
+                              value={brightness}
+                              onChange={(e) =>
+                                setBrightness(Number(e.target.value))
+                              }
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Grayscale</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{grayscale}%</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={grayscale}
+                              onChange={(e) =>
+                                setGrayscale(Number(e.target.value))
+                              }
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Contrast</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{contrast}%</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={300}
+                              value={contrast}
+                              onChange={(e) =>
+                                setContrast(Number(e.target.value))
+                              }
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Saturation</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{saturation}%</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={300}
+                              value={saturation}
+                              onChange={(e) =>
+                                setSaturation(Number(e.target.value))
+                              }
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Sepia</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{sepia}%</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={sepia}
+                              onChange={(e) => setSepia(Number(e.target.value))}
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Opacity</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{opacity}%</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={opacity}
+                              onChange={(e) =>
+                                setOpacity(Number(e.target.value))
+                              }
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Hue Rotation</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{hueRotation}˚</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={360}
+                              value={hueRotation}
+                              onChange={(e) =>
+                                setHueRotation(Number(e.target.value))
+                              }
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Invert</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{invert}%</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={invert}
+                              onChange={(e) =>
+                                setInvert(Number(e.target.value))
+                              }
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                        <div>
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                            <label
+                              htmlFor="rotate-input"
+                              className="text-xs flex w-full"
+                            >
+                              <span>Blur</span>
+                              <div className="flex-grow"></div>
+                              <span className="text-xs">{blur}</span>
+                            </label>
+                            <input
+                              className="w-full"
+                              id="rotate-input"
+                              type="range"
+                              min={0}
+                              max={200}
+                              value={blur}
+                              onChange={(e) => setBlur(Number(e.target.value))}
+                            />
+                          </div>{' '}
+                        </div>{' '}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex-grow"></div>
                 <div className="flex w-full sticky bottom-0 lg:static lg:bg-none lg:border-none lg:justify-end lg:shadow-none">
@@ -322,7 +553,9 @@ const BulkEditPhotos = (): JSX.Element => {
 
               <div
                 className={`flex flex-wrap flex-grow-1 h-full items-start content-start justify-start lg:justify-start ${
-                  activeTool !== 'frame' ? 'hidden' : 'visible'
+                  ['frame', 'adjust'].includes(activeTool)
+                    ? 'visible'
+                    : 'hidden'
                 }`}
               >
                 {croppedCanvases.map((canvas, index) => {
@@ -338,6 +571,15 @@ const BulkEditPhotos = (): JSX.Element => {
                             bottom,
                             right,
                           }}
+                          brightness={brightness}
+                          grayscale={grayscale}
+                          contrast={contrast}
+                          hueRotation={hueRotation}
+                          invert={invert}
+                          saturation={saturation}
+                          sepia={sepia}
+                          opacity={opacity}
+                          blur={blur}
                         />
                       )}
                     </div>
