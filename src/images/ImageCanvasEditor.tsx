@@ -23,6 +23,7 @@ interface ImageCanvasEditorProps {
   sepia?: number;
   opacity?: number;
   blur?: number;
+  previewSize?: number;
 }
 
 export interface CanvasEditorRef {
@@ -51,6 +52,7 @@ export const ImageCanvasEditor = forwardRef<
     sepia = 0,
     opacity = 100,
     blur = 0,
+    previewSize = 100,
   },
   ref
 ): JSX.Element {
@@ -102,10 +104,14 @@ export const ImageCanvasEditor = forwardRef<
         {srcCanvas ? (
           <canvas
             ref={canvasRef}
-            className="h-40 inline-block pointer-events-none"
+            style={{ height: previewSize }}
+            className="inline-block pointer-events-none"
           />
         ) : (
-          <div className="h-40 w-32 flex justify-center items-center">
+          <div
+            style={{ height: previewSize }}
+            className="w-32 flex justify-center items-center"
+          >
             <div className="w-9 transform scale-75">
               <GridLoader
                 color={'#BFDBFE'}

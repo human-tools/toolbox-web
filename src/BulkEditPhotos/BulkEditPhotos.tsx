@@ -1,3 +1,4 @@
+import { PhotoIcon } from '@heroicons/react/24/solid';
 import JSZip from 'jszip';
 import { doc } from 'prettier';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -39,6 +40,7 @@ const BulkEditPhotos = (): JSX.Element => {
   const [opacity, setOpacity] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [sepia, setSepia] = useState(0);
+  const [previewSize, setPreviewSize] = useState(250);
 
   const onCrop = useCallback(() => {
     const croppedCanvases = cropperRefs.current.map((cropper) => {
@@ -130,14 +132,39 @@ const BulkEditPhotos = (): JSX.Element => {
             <div className="flex flex-grow m-3 lg:ml-0">
               {/* Sidebar */}
               <div className="flex flex-col p-3 bg-gray-800 w-96">
-                <div className="h-10 w-48">
-                  <UploadButton
-                    onDrop={onDrop}
-                    accept="image/*"
-                    fullSized={false}
-                  >
-                    <span className="text-base">Add More Images</span>
-                  </UploadButton>
+                <div className="flex w-full">
+                  <div className="h-10 w-48">
+                    <UploadButton
+                      onDrop={onDrop}
+                      accept="image/*"
+                      fullSized={false}
+                    >
+                      <span className="text-base">Add More Images</span>
+                    </UploadButton>
+                  </div>
+                  <div className="flex-grow" />
+                  <div className="flex items-center">
+                    <div>
+                      <button
+                        className="h-5 self-end bg-green-500 text-white px-1 hover:bg-green-700 mr-2"
+                        onClick={() => {
+                          setPreviewSize((previewSize) => previewSize / 1.2);
+                        }}
+                      >
+                        <PhotoIcon className="w-3" />
+                      </button>
+                    </div>{' '}
+                    <div>
+                      <button
+                        className="h-8 self-end bg-green-500 text-white px-1 hover:bg-green-700"
+                        onClick={() => {
+                          setPreviewSize((previewSize) => previewSize * 1.2);
+                        }}
+                      >
+                        <PhotoIcon className="w-5" />
+                      </button>
+                    </div>{' '}
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   {/* Crops */}
@@ -545,6 +572,7 @@ const BulkEditPhotos = (): JSX.Element => {
                         image={image}
                         ref={(ref) => registerPhotoCropperRef(ref, index)}
                         onCrop={onCrop}
+                        previewSize={previewSize}
                       />
                     </div>
                   );
@@ -580,6 +608,7 @@ const BulkEditPhotos = (): JSX.Element => {
                           sepia={sepia}
                           opacity={opacity}
                           blur={blur}
+                          previewSize={previewSize}
                         />
                       )}
                     </div>
