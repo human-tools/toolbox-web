@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import ReactCrop, { centerCrop, Crop, makeAspectCrop } from 'react-image-crop';
+import { DEFAULT_ROTATION } from './defaults';
 import { ImageData } from './ImagePreview';
 
 const TO_RADIANS = Math.PI / 180;
@@ -49,7 +50,7 @@ const PhotoCropper = forwardRef<PhotoCropperRef, Props>(function (
 ): JSX.Element {
   const [crop, setCrop] = useState<Crop>();
   const [scale, setScale] = useState(1);
-  const [rotate, setRotate] = useState(0);
+  const [rotate, setRotate] = useState(DEFAULT_ROTATION);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const canvas = useMemo(() => {
@@ -165,7 +166,11 @@ const PhotoCropper = forwardRef<PhotoCropperRef, Props>(function (
       {/* Toolbar */}
       <div className="flex flex-col w-full">
         <div className="flex items-start w-full py-1 px-2 flex-col border border-2">
-          <label htmlFor="rotate-input" className="text-xs flex w-full">
+          <label
+            htmlFor="rotate-input"
+            className="text-xs flex w-full"
+            onDoubleClick={() => setRotate(DEFAULT_ROTATION)}
+          >
             <span>Rotate</span>
             <div className="flex-grow"></div>
             <span className="text-xs">{rotate}˚</span>

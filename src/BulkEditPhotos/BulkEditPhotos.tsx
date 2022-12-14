@@ -3,6 +3,21 @@ import JSZip from 'jszip';
 import { doc } from 'prettier';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import UploadButton from '../components/UploadButton';
+import {
+  DEFAULT_BLUR,
+  DEFAULT_BOTTOM,
+  DEFAULT_BRIGHTNESS,
+  DEFAULT_CONTRAST,
+  DEFAULT_GRAYSCALE,
+  DEFAULT_HUE_ROTATION,
+  DEFAULT_INVERT,
+  DEFAULT_LEFT,
+  DEFAULT_OPACITY,
+  DEFAULT_RIGHT,
+  DEFAULT_SATURATION,
+  DEFAULT_SEPIA,
+  DEFAULT_TOP,
+} from '../images/defaults';
 import { readImageSizing } from '../images/helpers';
 import {
   CanvasEditorRef,
@@ -26,20 +41,20 @@ const BulkEditPhotos = (): JSX.Element => {
   >([]);
   const cropperRefs = useRef<PhotoCropperRef[]>([]);
   const canvasEditorRefs = useRef<CanvasEditorRef[]>([]);
-  const [top, setTop] = useState(0);
-  const [bottom, setBottom] = useState(0);
-  const [right, setRight] = useState(0);
-  const [left, setLeft] = useState(0);
+  const [top, setTop] = useState(DEFAULT_TOP);
+  const [bottom, setBottom] = useState(DEFAULT_BOTTOM);
+  const [right, setRight] = useState(DEFAULT_RIGHT);
+  const [left, setLeft] = useState(DEFAULT_LEFT);
   const [activeTool, setActiveTool] = useState<Tool>('crop');
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
-  const [blur, setBlur] = useState(0);
-  const [grayscale, setGrayscale] = useState(0);
-  const [hueRotation, setHueRotation] = useState(0);
-  const [invert, setInvert] = useState(0);
-  const [opacity, setOpacity] = useState(100);
-  const [saturation, setSaturation] = useState(100);
-  const [sepia, setSepia] = useState(0);
+  const [brightness, setBrightness] = useState(DEFAULT_BRIGHTNESS);
+  const [contrast, setContrast] = useState(DEFAULT_CONTRAST);
+  const [blur, setBlur] = useState(DEFAULT_BLUR);
+  const [grayscale, setGrayscale] = useState(DEFAULT_GRAYSCALE);
+  const [hueRotation, setHueRotation] = useState(DEFAULT_HUE_ROTATION);
+  const [invert, setInvert] = useState(DEFAULT_INVERT);
+  const [opacity, setOpacity] = useState(DEFAULT_OPACITY);
+  const [saturation, setSaturation] = useState(DEFAULT_SATURATION);
+  const [sepia, setSepia] = useState(DEFAULT_SEPIA);
   const [previewSize, setPreviewSize] = useState(250);
 
   const onCrop = useCallback(() => {
@@ -230,11 +245,12 @@ const BulkEditPhotos = (): JSX.Element => {
                     </div>{' '}
                     {activeTool === 'frame' && (
                       <div className="flex flex-wrap items-center bg-gray-500  px-2 py-4">
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="top-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setTop(DEFAULT_TOP)}
                             >
                               <span>Top</span>
                               <div className="flex-grow"></div>
@@ -242,7 +258,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="top-input"
                               type="range"
                               min={0}
                               max={200}
@@ -251,11 +267,12 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="left-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setLeft(DEFAULT_LEFT)}
                             >
                               <span>Left</span>
                               <div className="flex-grow"></div>
@@ -263,7 +280,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="left-input"
                               type="range"
                               min={0}
                               max={200}
@@ -272,11 +289,12 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="bottom-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setBottom(DEFAULT_BOTTOM)}
                             >
                               <span>Bottom</span>
                               <div className="flex-grow"></div>
@@ -284,7 +302,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="bottom-input"
                               type="range"
                               min={0}
                               max={200}
@@ -295,11 +313,12 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="right-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setRight(DEFAULT_RIGHT)}
                             >
                               <span>Right</span>
                               <div className="flex-grow"></div>
@@ -307,7 +326,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="right-input"
                               type="range"
                               min={0}
                               max={200}
@@ -335,11 +354,14 @@ const BulkEditPhotos = (): JSX.Element => {
                     </div>{' '}
                     {activeTool === 'adjust' && (
                       <div className="flex flex-wrap items-center bg-gray-500 px-2 py-4">
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="brightness-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() =>
+                                setBrightness(DEFAULT_BRIGHTNESS)
+                              }
                             >
                               <span>Brightness</span>
                               <div className="flex-grow"></div>
@@ -347,7 +369,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="brightness-input"
                               type="range"
                               min={0}
                               max={300}
@@ -358,11 +380,14 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="grayscale-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() =>
+                                setGrayscale(DEFAULT_GRAYSCALE)
+                              }
                             >
                               <span>Grayscale</span>
                               <div className="flex-grow"></div>
@@ -370,7 +395,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="grayscale-input"
                               type="range"
                               min={0}
                               max={100}
@@ -381,11 +406,14 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="contrast-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() =>
+                                setContrast(DEFAULT_CONTRAST)
+                              }
                             >
                               <span>Contrast</span>
                               <div className="flex-grow"></div>
@@ -393,7 +421,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="contrast-input"
                               type="range"
                               min={0}
                               max={300}
@@ -404,11 +432,14 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="saturation-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() =>
+                                setSaturation(DEFAULT_SATURATION)
+                              }
                             >
                               <span>Saturation</span>
                               <div className="flex-grow"></div>
@@ -416,7 +447,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="saturation-input"
                               type="range"
                               min={0}
                               max={300}
@@ -427,11 +458,12 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="sepia-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setSepia(DEFAULT_SEPIA)}
                             >
                               <span>Sepia</span>
                               <div className="flex-grow"></div>
@@ -439,7 +471,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="sepia-input"
                               type="range"
                               min={0}
                               max={100}
@@ -448,11 +480,12 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="opacity-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setOpacity(DEFAULT_OPACITY)}
                             >
                               <span>Opacity</span>
                               <div className="flex-grow"></div>
@@ -460,7 +493,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="opacity-input"
                               type="range"
                               min={0}
                               max={100}
@@ -471,11 +504,14 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="hue-rotation-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() =>
+                                setHueRotation(DEFAULT_HUE_ROTATION)
+                              }
                             >
                               <span>Hue Rotation</span>
                               <div className="flex-grow"></div>
@@ -483,7 +519,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="hue-rotation-input"
                               type="range"
                               min={0}
                               max={360}
@@ -494,11 +530,12 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="invert-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setInvert(DEFAULT_INVERT)}
                             >
                               <span>Invert</span>
                               <div className="flex-grow"></div>
@@ -506,7 +543,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="invert-input"
                               type="range"
                               min={0}
                               max={100}
@@ -517,11 +554,12 @@ const BulkEditPhotos = (): JSX.Element => {
                             />
                           </div>{' '}
                         </div>{' '}
-                        <div>
-                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white">
+                        <div className="w-full">
+                          <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
-                              htmlFor="rotate-input"
+                              htmlFor="blur-input"
                               className="text-xs flex w-full"
+                              onDoubleClick={() => setBlur(DEFAULT_BLUR)}
                             >
                               <span>Blur</span>
                               <div className="flex-grow"></div>
@@ -529,7 +567,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             </label>
                             <input
                               className="w-full"
-                              id="rotate-input"
+                              id="blur-input"
                               type="range"
                               min={0}
                               max={200}
