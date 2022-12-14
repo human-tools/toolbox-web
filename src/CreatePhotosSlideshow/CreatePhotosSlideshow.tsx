@@ -166,6 +166,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
         )}
         {orderedItems.length > 0 && (
           <div className="flex flex-col flex-grow m-3 lg:ml-0">
+            {/* Top Toolbar */}
             <div className="flex p-3">
               <div className="h-10 w-48">
                 <UploadButton
@@ -179,7 +180,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
               <div>
                 <button
                   onClick={() => toggleColorPicker(!shouldShowColorPicker)}
-                  className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mx-2"
                 >
                   Pick Background Color
                 </button>
@@ -199,7 +200,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                   onClick={() =>
                     setConfig(() => ({ ...config, isBlured: !config.isBlured }))
                   }
-                  className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700"
                 >{`${
                   !config.isBlured
                     ? 'Enable Blur Background'
@@ -207,59 +208,65 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                 }`}</button>
               </div>
             </div>
-            <div className="flex flex-col flex-grow-1 relative align-middle self-center">
-              {!videoSrc && (
-                <div className="absolute text-center bg-black bg-opacity-50 text-white text-opacity-60 z-10 block w-full h-full flex flex-col items-center justify-center hover:text-opacity-100">
-                  {isGenerating && (
-                    <div className="text-2xl font-bold transform scale-150">
-                      {progress}%
-                    </div>
-                  )}
-                  {!isGenerating && (
-                    <button onClick={generateVideo}>
-                      <div>Click to Generate Slideshow</div>
-                      <p className="text-xs w-72 mt-3">
-                        Tip: You can drag to re-order your photos below to
-                        change the order of the photos in the slideshow
-                      </p>
-                    </button>
-                  )}
-                </div>
-              )}
-              <video
-                src={videoSrc}
-                controls
-                autoPlay={true}
-                className="h-52 lg:h-96 lg:w-auto"
-              />
-            </div>
-
-            <div
-              className="flex flex-wrap flex-grow-1 h-full my-1 items-start content-start justify-center lg:justify-start"
-              ref={setContainerRef}
-            >
-              {orderedItems.map((index) => {
-                return (
-                  <div
-                    ref={addDraggableNodeRef}
-                    key={index}
-                    className="rounded-md overflow-hidden border-2 border-white hover:cursor-move"
-                  >
-                    <ImagePreview image={images[index]} />
+            <div className="flex flex-row-reverse">
+              {/* Video */}
+              <div className="flex flex-col flex-grow-1 relative align-middle self-center">
+                {!videoSrc && (
+                  <div className="absolute text-center bg-black bg-opacity-50 text-white text-opacity-60 z-10 block w-full h-full flex flex-col items-center justify-center hover:text-opacity-100">
+                    {isGenerating && (
+                      <div className="text-2xl font-bold transform scale-150">
+                        {progress}%
+                      </div>
+                    )}
+                    {!isGenerating && (
+                      <button onClick={generateVideo}>
+                        <div>Click to Generate Slideshow</div>
+                        <p className="text-xs w-72 mt-3">
+                          Tip: You can drag to re-order your photos below to
+                          change the order of the photos in the slideshow
+                        </p>
+                      </button>
+                    )}
                   </div>
-                );
-              })}
+                )}
+                <video
+                  src={videoSrc}
+                  controls
+                  autoPlay={true}
+                  className="h-52 lg:h-96 lg:w-auto"
+                />
+              </div>
+
+              {/* Images */}
+              <div
+                className="flex flex-wrap flex-grow-1 h-full my-1 items-start content-start justify-center m-3 p-2 lg:justify-start"
+                ref={setContainerRef}
+              >
+                {orderedItems.map((index) => {
+                  return (
+                    <div
+                      ref={addDraggableNodeRef}
+                      key={index}
+                      className=" overflow-hidden border-2 border-white hover:cursor-move"
+                    >
+                      <ImagePreview image={images[index]} />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
+            <div className="flex-grow"></div>
+            {/* Bottom Controls */}
             {videoSrc && (
               <div className="flex w-full sticky bottom-0 bg-white p-2 shadow border-black border-opacity-20 border-solid	border lg:static lg:bg-none lg:border-none lg:justify-end lg:shadow-none">
                 <input
                   onChange={(e) => setFileName(e.target.value)}
                   type="text"
-                  className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5 rounded-md border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
+                  className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5  border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
                   placeholder="name-your-file.mp4"
                 />
                 <button
-                  className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
+                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700"
                   onClick={onSave}
                 >
                   Save Video

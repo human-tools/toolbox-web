@@ -1,4 +1,9 @@
-import { XCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import {
+  PhotoIcon,
+  PlusCircleIcon,
+  XCircleIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/solid';
 import { useSortable } from '@human-tools/use-sortable';
 import { saveAs } from 'file-saver';
 import { PDFDocument } from 'pdf-lib';
@@ -124,14 +129,17 @@ const CombinePDF = (): JSX.Element => {
             <div className="flex flex-col flex-grow">
               {/* Toolbar */}
               <div className="flex p-3">
-                <div className="h-10 w-48">
+                <div className="h-10 w-56">
                   <UploadButton onDrop={onDrop} accept=".pdf" fullSized={false}>
-                    <span className="text-base">Add Files</span>
+                    <div className="flex items-center text-center">
+                      <PlusCircleIcon className="h-5 mr-2" />
+                      <span className="text-base">Add Files</span>
+                    </div>
                   </UploadButton>
                 </div>
                 <div>
                   <button
-                    className="h-10 self-end bg-red-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2 text-base"
+                    className="h-10 self-end bg-red-600 text-white px-3 py-2 hover:bg-green-700 mx-2 text-base"
                     onClick={() => {
                       setPDF(undefined);
                       setDoc(undefined);
@@ -139,25 +147,27 @@ const CombinePDF = (): JSX.Element => {
                     }}
                     disabled={!pdf}
                   >
-                    Clear & Start Fresh
+                    <div className="flex items-center text-center">
+                      <XCircleIcon className="h-5 mr-2" />
+                      <span className="text-base">Start Over</span>
+                    </div>
                   </button>
                 </div>
                 <div className="flex-grow"></div>
-                <div>
-                  <span className="px-2 text-gray-500">Page Size</span>
+                <div className="flex justify-start align-top items-end">
                   <button
-                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                    className="h-5 bg-gray-500 text-white px-1 hover:bg-green-700 mr-2"
                     onClick={() => setScale((scale) => scale / 1.2)}
                     disabled={!pdf}
                   >
-                    <span>Smaller</span>
+                    <PhotoIcon className="w-3" />
                   </button>
                   <button
-                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
+                    className="h-8 bg-gray-500 text-white px-1 hover:bg-green-700"
                     onClick={() => setScale((scale) => scale * 1.2)}
                     disabled={!pdf}
                   >
-                    Larger
+                    <PhotoIcon className="w-5" />
                   </button>
                 </div>
               </div>
@@ -169,11 +179,11 @@ const CombinePDF = (): JSX.Element => {
                   <div
                     ref={addDraggableNodeRef}
                     key={pageNumber}
-                    className="relative shadow p-1 bg-white m-1 rounded-md overflow-hidden border-4 border-white hover:cursor-move"
+                    className="relative shadow p-1 bg-white m-1 overflow-hidden border-4 border-white hover:cursor-move"
                   >
                     <div
                       onClick={(e) => onDelete(pageNumber)}
-                      className="absolute right-0 rounded-md p-1 text-white text-xs cursor-pointer bg-white"
+                      className="absolute right-0 p-1 text-white text-xs cursor-pointer bg-white"
                     >
                       <XCircleIcon className="h-4 w-4 text-red-500" />
                     </div>{' '}
@@ -192,11 +202,11 @@ const CombinePDF = (): JSX.Element => {
                 <input
                   onChange={(e) => setFileName(e.target.value)}
                   type="text"
-                  className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5 rounded-md border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
+                  className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5 border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
                   placeholder="name-your-file.pdf"
                 />
                 <button
-                  className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
+                  className="h-10 self-end bg-green-500 text-white px-3 py-2 hover:bg-green-700"
                   onClick={onSave}
                   disabled={!pdf}
                 >

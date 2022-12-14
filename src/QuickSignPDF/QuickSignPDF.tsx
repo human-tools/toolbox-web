@@ -10,6 +10,11 @@
  *    the scale the paths are affected in scaled and position.
  */
 
+import {
+  ArrowLeftCircleIcon,
+  ArrowRightCircleIcon,
+  PhotoIcon,
+} from '@heroicons/react/24/solid';
 import fabric from 'fabric';
 import { FabricJSEditor } from 'fabricjs-react';
 import { saveAs } from 'file-saver';
@@ -206,7 +211,7 @@ const QuickSignPDF = (): JSX.Element => {
             <div className="flex flex-col flex-grow">
               {/* Toolbar */}
               <div className="flex p-3">
-                <div className="h-10 w-48">
+                <div className="h-10 w-48 mr-2">
                   <UploadButton onDrop={onDrop} accept=".pdf" fullSized={false}>
                     <span className="text-base">Upload New File</span>
                   </UploadButton>
@@ -214,7 +219,7 @@ const QuickSignPDF = (): JSX.Element => {
                 <>
                   <div>
                     <button
-                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
                       onClick={() => {
                         if (!editorRef.current) return;
                         setIsDrawingMode(false);
@@ -234,7 +239,7 @@ const QuickSignPDF = (): JSX.Element => {
                   </div>
                   <div>
                     <button
-                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
                       onClick={() => {
                         if (!editorRef.current) return;
                         setIsDrawingMode((isDrawingMode) => !isDrawingMode);
@@ -245,7 +250,7 @@ const QuickSignPDF = (): JSX.Element => {
                   </div>
                   <div>
                     <button
-                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
                       onClick={() => {
                         editorRef.current?.deleteAll();
                         updatePageObjects();
@@ -256,7 +261,7 @@ const QuickSignPDF = (): JSX.Element => {
                   </div>
                   <div>
                     <button
-                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
                       onClick={() => {
                         editorRef.current?.deleteSelected();
                         updatePageObjects();
@@ -268,57 +273,58 @@ const QuickSignPDF = (): JSX.Element => {
                 </>
 
                 <div className="flex-grow"></div>
-                <div>
+                <div className="flex items-center">
+                  <button
+                    disabled={!pdf || activePage > (doc?.getPageCount() || 1)}
+                    className={` text-gray-500 px-3 py-2 ${
+                      activePage <= 1
+                        ? 'cursor-not-allowed	'
+                        : 'hover:text-green-700'
+                    }`}
+                    onClick={prevPage}
+                  >
+                    <ArrowLeftCircleIcon className="h-8" />
+                  </button>
                   <span className="px-2 text-gray-500">
                     Page ({activePage} of {doc?.getPageCount()})
                   </span>
                   <button
-                    disabled={!pdf || activePage > (doc?.getPageCount() || 1)}
-                    className={`h-10 self-end text-white px-3 py-2 rounded-md mx-2 ${
-                      activePage <= 1
-                        ? 'bg-gray-200 cursor-not-allowed	'
-                        : 'bg-green-500 hover:bg-green-700'
-                    }`}
-                    onClick={prevPage}
-                  >
-                    <span>Previous</span>
-                  </button>
-                  <button
                     disabled={!pdf || activePage >= (doc?.getPageCount() || 1)}
-                    className={`h-10 self-end text-white px-3 py-2 rounded-md ${
+                    className={` text-gray-500 px-3 py-2  ${
                       activePage >= doc!.getPageCount()
-                        ? 'bg-gray-200 cursor-not-allowed	'
-                        : 'bg-green-500 hover:bg-green-700'
+                        ? 'cursor-not-allowed	'
+                        : 'hover:text-green-700'
                     }`}
                     onClick={nextPage}
                   >
-                    Next
+                    <ArrowRightCircleIcon className="h-8" />
                   </button>
                 </div>
                 <div>
-                  <span className="px-2 text-gray-500">Page Size</span>
-                  <button
-                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
-                    onClick={() => setScale((scale) => scale / 1.2)}
-                    disabled={!pdf}
-                  >
-                    <span>Smaller</span>
-                  </button>
-                  <button
-                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
-                    onClick={() => setScale((scale) => scale * 1.2)}
-                    disabled={!pdf}
-                  >
-                    Larger
-                  </button>
+                  <div className="flex justify-start align-top items-end ml-2">
+                    <button
+                      className="h-5 bg-gray-500 text-white px-1 hover:bg-green-700 mr-2"
+                      onClick={() => setScale((scale) => scale / 1.2)}
+                      disabled={!pdf}
+                    >
+                      <PhotoIcon className="w-3" />
+                    </button>
+                    <button
+                      className="h-8 bg-gray-500 text-white px-1 hover:bg-green-700"
+                      onClick={() => setScale((scale) => scale * 1.2)}
+                      disabled={!pdf}
+                    >
+                      <PhotoIcon className="w-5" />
+                    </button>
+                  </div>{' '}
                 </div>
               </div>
               {pdf && (
                 <div className="flex flex-row justify-center">
-                  <div className="flex flex-col max-h-screen overflow-auto">
+                  <div className="flex flex-col max-h-screen overflow-auto mx-8">
                     {new Array(pdf.numPages).fill(0).map((_, index) => (
                       <div
-                        className="cursor-pointer"
+                        className="cursor-pointer relative m-2 shadow"
                         onClick={() => goToSelectedPage(index + 1)}
                       >
                         <PagePreview
@@ -327,27 +333,38 @@ const QuickSignPDF = (): JSX.Element => {
                           pageNumber={index + 1}
                           pdf={pdf}
                         />
-                        <div className="mb-8 text-center"> {index + 1} </div>
+                        <div
+                          className={`text-center absolute w-full bg-opacity-50 bottom-0 text-xs p-2 ${
+                            activePage === index + 1
+                              ? 'bg-green-700 text-white'
+                              : 'bg-white'
+                          }`}
+                        >
+                          {' '}
+                          Page {index + 1}{' '}
+                        </div>
                       </div>
                     ))}
                   </div>
-                  <FabricPagePreview
-                    scale={scale}
-                    pageNumber={activePage}
-                    pdf={pdf}
-                    ref={editorRef}
-                  />
+                  <div className="shadow m-2">
+                    <FabricPagePreview
+                      scale={scale}
+                      pageNumber={activePage}
+                      pdf={pdf}
+                      ref={editorRef}
+                    />
+                  </div>
                 </div>
               )}
               <div className="flex w-full sticky bottom-0 bg-white p-2 shadow border-black border-opacity-20 border-solid	border lg:static lg:bg-none lg:border-none lg:justify-end lg:shadow-none">
                 <input
                   onChange={(e) => setFileName(e.target.value)}
                   type="text"
-                  className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5 rounded-md border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
+                  className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5  border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
                   placeholder="name-your-file.pdf"
                 />
                 <button
-                  className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
+                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700"
                   onClick={onSave}
                   disabled={!pdf}
                 >
