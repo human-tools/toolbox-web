@@ -61,8 +61,6 @@ const SLIDESHOW_COMMAND = [
   'out.txt',
   '-c:v',
   'libx264',
-  '-r',
-  '30',
   '-pix_fmt',
   'yuv420p',
 ];
@@ -128,17 +126,18 @@ const CreatePhotosSlideshow = (): JSX.Element => {
     });
 
     const inputPaths: Array<string> = [];
-    orderedItems.forEach(async (itemPosition, index) => {
+    for (let i = 0; i < orderedItems.length; i++) {
+      const itemPosition = orderedItems[i];
       const fileName = getCleanName(files[itemPosition].name);
-      inputPaths.push(`file ${fileName}\nduration 2`);
+      inputPaths.push(`file ${fileName}\nduration 1`);
       ffmpeg.FS('writeFile', fileName, await fetchFile(files[itemPosition]));
 
       // add the last file into the txt this is a quricky bug in ffmpeg
-      const isLastFile = index === orderedItems.length - 1;
+      const isLastFile = i === orderedItems.length - 1;
       if (isLastFile) {
         inputPaths.push(`file ${fileName}`);
       }
-    });
+    }
 
     ffmpeg.FS(
       'writeFile',
@@ -152,11 +151,12 @@ const CreatePhotosSlideshow = (): JSX.Element => {
       ffmpegRenderCommand.push(`split [copy][original]; \ 
         [copy] scale=${config.res}:force_original_aspect_ratio=increase,boxblur=20,crop=${config.res}[blured]; \
         [original] scale=${config.res}:force_original_aspect_ratio=decrease[scaled_original]; \ 
-        [blured][scaled_original]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2`);
+        [blured][scaled_original]overlay=((main_w-overlay_w)/2):((main_h-overlay_h)/2)`);
     } else {
       ffmpegRenderCommand.push('-vf');
-      ffmpegRenderCommand.push(`
-        scale=${config.res}:force_original_aspect_ratio=decrease,pad=${config.res}:(ow-iw)/2:(oh-ih)/2:${config.background}`);
+      ffmpegRenderCommand.push(
+        `scale=${config.res}:force_original_aspect_ratio=decrease,pad=${config.res}:(ow-iw)/2:(oh-ih)/2:${config.background}`
+      );
     }
     ffmpegRenderCommand.push('out.mp4');
     await ffmpeg.run(...ffmpegRenderCommand);
