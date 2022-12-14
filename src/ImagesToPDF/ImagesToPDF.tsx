@@ -1,11 +1,12 @@
-import { useSortable } from '@human-tools/use-sortable';
-import { saveAs } from 'file-saver';
+import { XCircleIcon } from '@heroicons/react/24/solid';
+import { useCallback, useState } from 'react';
 import { PDFDocument, PDFImage } from 'pdf-lib';
+import { saveAs } from 'file-saver';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import { useCallback, useState } from 'react';
-import UploadButton from '../components/UploadButton';
 import PagePreview from '../PDFViewer/PagePreview';
+import { useSortable } from '@human-tools/use-sortable';
+import UploadButton from '../components/UploadButton';
 
 async function generatePDF(files: File[], addToDoc?: PDFDocument) {
   const pdfDoc = addToDoc ? addToDoc : await PDFDocument.create();
@@ -48,6 +49,7 @@ async function getOrderedPdf(srcPdf: PDFDocument, order: number[]) {
 const GeneratePDFFromImages = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
+  const [scale, setScale] = useState<number>(0.15);
   const {
     orderedItems: pagesOrder,
     setItems: setPagesOrder,
@@ -64,6 +66,7 @@ const GeneratePDFFromImages = (): JSX.Element => {
 
   const onDrop = useCallback(
     async (files) => {
+      const oldPagesCount = doc?.getPageCount() || 0;
       const { bytes, pageCount, doc: newPdfDoc } = await generatePDF(
         files,
         doc
@@ -73,7 +76,6 @@ const GeneratePDFFromImages = (): JSX.Element => {
       // To avoid losing previously ordered indexes.
       const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
       const oldPagesOrder = pagesOrder;
-      const oldPagesCount = oldPagesOrder.length;
       const newlyAddedPagesOrder = new Array(pageCount - oldPagesCount)
         .fill(0)
         .map((_, index) => oldPagesCount + index + 1);
@@ -82,7 +84,7 @@ const GeneratePDFFromImages = (): JSX.Element => {
       setPDF(pdf);
       setPagesOrder(newOrder);
     },
-    [setPagesOrder, doc, pagesOrder]
+    [doc, pagesOrder]
   );
 
   const onSave = useCallback(async () => {
@@ -94,19 +96,84 @@ const GeneratePDFFromImages = (): JSX.Element => {
     );
   }, [doc, fileName, pagesOrder]);
 
+  const onDelete = useCallback(
+    (pageNumber: number) => {
+      const newPagesOrder = [...pagesOrder];
+      const indexToDelete = newPagesOrder.indexOf(pageNumber);
+      newPagesOrder.splice(indexToDelete, 1);
+      setPagesOrder(newPagesOrder);
+      if (newPagesOrder.length === 0) {
+        setPDF(undefined);
+        setDoc(undefined);
+      }
+    },
+    [pagesOrder]
+  );
+
+  const applyScale = useCallback(
+    (newScale) => {
+      setScale(newScale);
+    },
+    [scale]
+  );
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex flex-col flex-grow h-full w-full xl:flex-row">
         <div className="flex flex-col flex-grow h-full w-full lg:flex-row">
-          <div className="px-3 py-3 flex-grow ">
-            <UploadButton
-              onDrop={onDrop}
-              accept=".png,.jpg,.jpeg"
-              fullSized={!pdf}
-            />
-          </div>
-          {pdf && pdf.numPages === pagesOrder.length && (
+          {!pdf && (
+            <div className="px-3 py-3 flex-grow ">
+              <UploadButton
+                onDrop={onDrop}
+                accept=".png,.jpg,.jpeg"
+                fullSized={!pdf}
+              />
+            </div>
+          )}
+          {pdf && (
             <div className="flex flex-col flex-grow">
+              {/* Toolbar */}
+              <div className="flex p-3">
+                <div className="h-10 w-48">
+                  <UploadButton
+                    onDrop={onDrop}
+                    accept=".png,.jpg,.jpeg"
+                    fullSized={!pdf}
+                  >
+                    <span className="text-base">Add New Image</span>
+                  </UploadButton>
+                </div>
+                <div>
+                  <button
+                    className="h-10 self-end bg-red-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2 text-base"
+                    onClick={() => {
+                      setPDF(undefined);
+                      setDoc(undefined);
+                      setScale(0.15);
+                      setPagesOrder([]);
+                    }}
+                    disabled={!pdf}
+                  >
+                    Clear & Start Fresh
+                  </button>
+                </div>
+                <div className="flex-grow"></div>
+                <div>
+                  <span className="px-2 text-gray-500">Preview Size</span>
+                  <button
+                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                    onClick={() => applyScale(scale / 1.15)}
+                  >
+                    <span>Smaller</span>
+                  </button>
+                  <button
+                    className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700"
+                    onClick={() => applyScale(scale * 1.15)}
+                  >
+                    Larger
+                  </button>
+                </div>
+              </div>
               <div
                 className="flex p-2 flex-wrap flex-grow-1 h-full my-1 items-start content-start justify-center lg:justify-start"
                 ref={setContainerRef}
@@ -115,10 +182,17 @@ const GeneratePDFFromImages = (): JSX.Element => {
                   <div
                     ref={addDraggableNodeRef}
                     key={pageNumber}
-                    className="shadow p-1 bg-white m-1 rounded-md overflow-hidden border-4 border-white hover:cursor-move"
+                    className="relative shadow p-1 bg-white m-1 rounded-md overflow-hidden border-4 border-white hover:cursor-move"
                   >
+                    <div
+                      onClick={(e) => onDelete(pageNumber)}
+                      className="absolute right-0 rounded-md p-1 text-white text-xs cursor-pointer bg-white"
+                    >
+                      <XCircleIcon className="h-4 w-4 text-red-500" />
+                    </div>{' '}
                     <PagePreview
                       key={pageNumber}
+                      scale={scale}
                       pageNumber={pageNumber}
                       pdf={pdf}
                     />
