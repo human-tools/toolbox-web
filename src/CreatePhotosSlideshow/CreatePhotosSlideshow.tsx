@@ -1,6 +1,6 @@
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import { useSortable } from '@human-tools/use-sortable';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { ChromePicker } from 'react-color';
 import UploadButton from '../components/UploadButton';
 import { readImageSizing } from '../images/helpers';
@@ -161,7 +161,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   }, [fileName, videoSrc]);
 
   return (
-    <div className="h-full flex flex-row">
+    <div className="h-full flex flex-col">
       <div className="flex flex-grow flex-col h-full w-full lg:flex-row">
         {orderedItems.length == 0 && (
           <div className="px-3 py-3 flex-grow">
@@ -216,7 +216,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                 }`}</button>
               </div>
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-row">
               {/* Video */}
               <div className="flex flex-col flex-grow-1 relative align-middle self-center">
                 {!videoSrc && (
