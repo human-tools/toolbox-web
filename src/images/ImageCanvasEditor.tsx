@@ -14,6 +14,15 @@ interface ImageCanvasEditorProps {
     left: number;
     right: number;
   };
+  brightness?: number;
+  grayscale?: number;
+  contrast?: number;
+  hueRotation?: number;
+  invert?: number;
+  saturation?: number;
+  sepia?: number;
+  opacity?: number;
+  blur?: number;
 }
 
 export interface CanvasEditorRef {
@@ -33,6 +42,15 @@ export const ImageCanvasEditor = forwardRef<
       right: 0,
       bottom: 0,
     },
+    brightness = 100,
+    grayscale = 100,
+    contrast = 100,
+    hueRotation = 0,
+    invert = 0,
+    saturation = 100,
+    sepia = 0,
+    opacity = 100,
+    blur = 0,
   },
   ref
 ): JSX.Element {
@@ -64,6 +82,7 @@ export const ImageCanvasEditor = forwardRef<
     canvas.height = srcCanvas.height;
     // ctx.scale(0.9, 0.9);
     ctx.fillStyle = '#fff';
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) opacity(${opacity}%) sepia(${sepia}%) grayscale(${grayscale}%) hue-rotate(${hueRotation}deg) saturate(${saturation}%) invert(${invert}%) blur(${blur}px)`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(
       srcCanvas,
@@ -76,7 +95,7 @@ export const ImageCanvasEditor = forwardRef<
       srcCanvas.width - frame.right,
       srcCanvas.height - frame.bottom
     );
-  }, [frame.bottom, frame.left, frame.right, frame.top, srcCanvas]);
+  }, [blur, brightness, contrast, frame.bottom, frame.left, frame.right, frame.top, grayscale, hueRotation, invert, opacity, saturation, sepia, srcCanvas]);
   return (
     <div className="flex justify-center">
       <div className="shadow-md m-0.5">
