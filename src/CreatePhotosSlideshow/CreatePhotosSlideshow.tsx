@@ -1,50 +1,15 @@
-import React, { useCallback, useState } from 'react';
-import UploadButton from '../components/UploadButton';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-import Rotator from './Rotator';
 import { useSortable } from '@human-tools/use-sortable';
-import GridLoader from 'react-spinners/GridLoader';
+import { useCallback, useState } from 'react';
+import UploadButton from '../components/UploadButton';
+import { readImageSizing } from '../images/helpers';
+import { ImageData, ImagePreview } from '../images/ImagePreview';
+import Rotator from './Rotator';
 import { ChromePicker } from 'react-color';
 
 const getCleanName = (fileName: string): string => {
   return fileName.replace(/([^a-zA-Z0-9]+)/gi, '-');
 };
-
-interface ImagePreviewProps {
-  image?: ImageData;
-}
-
-const ImagePreview = ({ image }: ImagePreviewProps) => {
-  return (
-    <div className="flex h-full justify-center items-center">
-      <div className="shadow-sm m-0.5">
-        {image ? (
-          <img
-            src={image.url}
-            className="h-40 inline-block pointer-events-none"
-          />
-        ) : (
-          <div className="h-40 w-32 flex justify-center items-center">
-            <div className="w-9 transform scale-75">
-              <GridLoader
-                color={'#BFDBFE'}
-                loading={true}
-                size={8}
-                margin="5px"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-interface ImageData {
-  url: string;
-  width: number;
-  height: number;
-}
 
 interface SlideshowConfig {
   isBlured: boolean;
@@ -53,10 +18,10 @@ interface SlideshowConfig {
 }
 
 const SLIDESHOW_COMMAND = [
-  '-f',
-  'concat',
   '-safe',
   '0',
+  '-f',
+  'concat',
   '-i',
   'out.txt',
   '-c:v',
@@ -69,18 +34,6 @@ const ASPECT_RATIOS = {
   '16:9': '1280:720',
   '9:16': '720:1280',
 };
-
-const readImageSizing = (url: string) =>
-  new Promise<{ width: number; height: number }>((resolve) => {
-    const img = new Image();
-    img.onload = function () {
-      resolve({
-        width: img.width,
-        height: img.height,
-      });
-    };
-    img.src = url;
-  });
 
 const ffmpeg = createFFmpeg({
   log: true,
@@ -133,9 +86,10 @@ const CreatePhotosSlideshow = (): JSX.Element => {
       ffmpeg.FS('writeFile', fileName, await fetchFile(files[itemPosition]));
 
       // add the last file into the txt this is a quricky bug in ffmpeg
+      // more details here in ffmpeg bug tracker https://trac.ffmpeg.org/ticket/6128
       const isLastFile = i === orderedItems.length - 1;
       if (isLastFile) {
-        inputPaths.push(`file ${fileName}`);
+        inputPaths.push(`file ${fileName}\nduration 0.04`);
       }
     }
 

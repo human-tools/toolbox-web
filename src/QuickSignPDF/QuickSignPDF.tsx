@@ -40,8 +40,12 @@ async function drawFabricObjectsOnAllPages(
   pdfDoc: PDFDocument,
   fabricObjects: { [index: number]: any }
 ) {
-  const pages = pdfDoc.getPages();
+  // Copy PDF to a new document to avoid mutating it and locking us from
+  // making further edits.
+  const newPdfDoc = await PDFDocument.create();
+  const pages = await newPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
   pages.forEach((page, index) => {
+    newPdfDoc.addPage(page);
     const json = fabricObjects[index + 1];
     json?.objects.forEach((object: any) => {
       switch (object.type) {
@@ -74,8 +78,8 @@ async function drawFabricObjectsOnAllPages(
   });
 
   return {
-    bytes: await pdfDoc.save(),
-    doc: pdfDoc,
+    bytes: await newPdfDoc.save(),
+    doc: newPdfDoc,
   };
 }
 
@@ -83,9 +87,8 @@ const QuickSignPDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
   const [activePage, setActivePage] = useState<number>(1);
-  const [scale] = useState(1);
+  const [scale, setScale] = useState(1);
   const [isDrawingMode, setIsDrawingMode] = useState<boolean>(false);
-  const [alreadyBurned, setAlreadyBurned] = useState<boolean>(false);
 
   // Tracks all pages drawables so we can burn them to the PDF once the user
   // click Sign & Download. This also allows humans to continue editing different
@@ -122,7 +125,6 @@ const QuickSignPDF = (): JSX.Element => {
   const onDrop = useCallback(async (files) => {
     setActivePage(1);
     setPagesFabricObjects({});
-    setAlreadyBurned(false);
     editorRef.current?.deleteAll();
     const { bytes, doc: newDoc } = await createPDF(files);
     const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
@@ -152,23 +154,19 @@ const QuickSignPDF = (): JSX.Element => {
     );
 
     const pdf = (await getDocument(bytes).promise) as PDFDocumentProxy;
-    setPagesFabricObjects({});
-    setDoc(signedDoc);
-    setPDF(pdf);
+    return { bytes, pdf, doc: signedDoc };
   }, [doc, pagesFabricObjects]);
 
   const onSave = useCallback(async () => {
     if (!doc) return;
     if (!editorRef.current) return;
-    await signFabric();
+    const signedResults = await signFabric();
+    if (!signedResults) return;
     setIsDrawingMode(false);
-    editorRef.current.deleteAll();
-    const bytes = await doc.save();
     saveAs(
-      new Blob([bytes]),
+      new Blob([signedResults.bytes]),
       fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`
     );
-    setAlreadyBurned(true);
   }, [doc, fileName, signFabric]);
 
   useEffect(() => {
@@ -213,65 +211,61 @@ const QuickSignPDF = (): JSX.Element => {
                     <span className="text-base">Upload New File</span>
                   </UploadButton>
                 </div>
-                {alreadyBurned && (
+                <>
                   <div>
-                    <div className="p-2 text-gray-500">
-                      Already finished signing. Upload New File to sign another
-                      document.
-                    </div>
-                  </div>
-                )}
-                {!alreadyBurned && (
-                  <>
-                    <div>
-                      <button
-                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
-                        onClick={() => {
-                          if (!editorRef.current) return;
-                          setIsDrawingMode(false);
-                          const text = new fabric.fabric.Textbox('Hello', {
-                            fontFamily: 'Helvetica',
-                            fontSize: 16,
-                            hasControls: false,
-                            width: 400,
-                          });
-                          editorRef.current.canvas.add(text);
+                    <button
+                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      onClick={() => {
+                        if (!editorRef.current) return;
+                        setIsDrawingMode(false);
+                        const text = new fabric.fabric.Textbox('Hello', {
+                          fontFamily: 'Helvetica',
+                          fontSize: 16,
+                          hasControls: false,
+                          width: 400,
+                        });
+                        editorRef.current.canvas.add(text);
 
-                          updatePageObjects();
-                        }}
-                      >
-                        Add Text
-                      </button>
-                    </div>
-                    <div>
-                      <button
-                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
-                        onClick={() => {
-                          if (!editorRef.current) return;
-                          setIsDrawingMode((isDrawingMode) => !isDrawingMode);
-                        }}
-                      >
-                        {isDrawingMode ? 'Stop Drawing' : 'Start Drawing'}
-                      </button>
-                    </div>
-                    <div>
-                      <button
-                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
-                        onClick={() => editorRef.current?.deleteAll()}
-                      >
-                        Clear
-                      </button>
-                    </div>
-                    <div>
-                      <button
-                        className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
-                        onClick={() => editorRef.current?.deleteSelected()}
-                      >
-                        Delete Selected
-                      </button>
-                    </div>
-                  </>
-                )}
+                        updatePageObjects();
+                      }}
+                    >
+                      Add Text
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      onClick={() => {
+                        if (!editorRef.current) return;
+                        setIsDrawingMode((isDrawingMode) => !isDrawingMode);
+                      }}
+                    >
+                      {isDrawingMode ? 'Stop Drawing' : 'Start Drawing'}
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      onClick={() => {
+                        editorRef.current?.deleteAll();
+                        updatePageObjects();
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
+                      onClick={() => {
+                        editorRef.current?.deleteSelected();
+                        updatePageObjects();
+                      }}
+                    >
+                      Delete Selected
+                    </button>
+                  </div>
+                </>
 
                 <div className="flex-grow"></div>
                 <div>
@@ -301,8 +295,7 @@ const QuickSignPDF = (): JSX.Element => {
                     Next
                   </button>
                 </div>
-                {/* TODO(fix): Page scale would affect the drawn SVG scales and position */}
-                {/* <div>
+                <div>
                   <span className="px-2 text-gray-500">Page Size</span>
                   <button
                     className="h-10 self-end bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-700 mx-2"
@@ -318,7 +311,7 @@ const QuickSignPDF = (): JSX.Element => {
                   >
                     Larger
                   </button>
-                </div> */}
+                </div>
               </div>
               {pdf && (
                 <div className="flex justify-center items-center">

@@ -52,9 +52,23 @@ const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
     setViewport(viewport);
   }, [pageNumber, pdf, scale]);
 
+  const onFabricReady = useCallback(
+    (canvas) => {
+      canvas.width = viewport!.width;
+      canvas.height = viewport!.height;
+      canvas.setZoom(scale || 1);
+      onReady(canvas);
+    },
+    [onReady, scale, viewport]
+  );
+
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    editor?.canvas.setZoom(scale || 1);
+  }, [editor?.canvas, scale]);
 
   return (
     <div className="relative">
@@ -69,11 +83,7 @@ const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
       {viewport && (
         <FabricJSCanvas
           className="absolute top-0 right-0 left-0 bottom-0"
-          onReady={(canvas) => {
-            canvas.width = viewport!.width;
-            canvas.height = viewport!.height;
-            onReady(canvas);
-          }}
+          onReady={onFabricReady}
         />
       )}
     </div>
