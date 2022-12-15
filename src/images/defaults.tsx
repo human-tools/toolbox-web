@@ -13,6 +13,7 @@ export const DEFAULT_INVERT = 0;
 export const DEFAULT_OPACITY = 100;
 export const DEFAULT_SATURATION = 100;
 export const DEFAULT_SEPIA = 0;
+export const DEFAULT_FRAME_COLOR = '#000';
 
 export const SOCIAL_PHOTO_SIZES = [
   { label: 'YouTube Thumbnail', width: 1280, height: 720 },
