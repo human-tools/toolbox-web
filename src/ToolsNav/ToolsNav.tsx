@@ -64,7 +64,7 @@ const ToolsNav = ({
         activeClassName={activeClassName}
         to="/quick-sign-pdf"
       >
-        Quick Sign
+        Quick Sign PDF
       </NavLink>
       <NavLink
         exact

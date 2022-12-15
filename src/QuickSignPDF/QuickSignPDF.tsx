@@ -6,6 +6,7 @@ import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
   ArrowUpTrayIcon,
+  CalendarDaysIcon,
   LanguageIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
@@ -300,6 +301,8 @@ const QuickSignPDF = (): JSX.Element => {
                       hasControls: false,
                       width: 400,
                       fill: rgbColorToCssRgba(color),
+                      top: 100,
+                      left: 100,
                     });
                     editorRef.current.canvas.add(text);
 
@@ -308,6 +311,31 @@ const QuickSignPDF = (): JSX.Element => {
                 >
                   <LanguageIcon className="w-5" />
                 </button>
+                <button
+                  className=" text-gray-500 px-3 py-2  hover:text-green-700 mr-2"
+                  onClick={() => {
+                    if (!editorRef.current) return;
+                    setIsDrawingMode(false);
+                    const text = new fabric.fabric.Textbox(
+                      new Date().toLocaleDateString(),
+                      {
+                        fontFamily: 'Helvetica',
+                        fontSize,
+                        hasControls: false,
+                        width: 400,
+                        fill: rgbColorToCssRgba(color),
+                        top: 100,
+                        left: 100,
+                      }
+                    );
+                    editorRef.current.canvas.add(text);
+
+                    updatePageObjects();
+                  }}
+                >
+                  <CalendarDaysIcon className="w-5" />
+                </button>
+
                 <button
                   className=" text-gray-500 px-1  hover:text-green-700 mr-2"
                   onClick={() => {
