@@ -1,10 +1,10 @@
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import { useSortable } from '@human-tools/use-sortable';
 import { useCallback, useState } from 'react';
-import { ChromePicker } from 'react-color';
 import UploadButton from '../components/UploadButton';
 import { readImageSizing } from '../images/helpers';
 import { ImageData, ImagePreview } from '../images/ImagePreview';
+import ColorPickerButton from '../ui/ColorPickerButton';
 import Rotator from './Rotator';
 
 const getCleanName = (fileName: string): string => {
@@ -45,7 +45,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [images, setImages] = useState<ImageData[]>([]);
-  const [shouldShowColorPicker, toggleColorPicker] = useState<boolean>(false);
   const {
     orderedItems,
     setItems,
@@ -167,8 +166,8 @@ const CreatePhotosSlideshow = (): JSX.Element => {
         {orderedItems.length > 0 && (
           <div className="flex flex-col flex-grow m-3 lg:ml-0">
             {/* Top Toolbar */}
-            <div className="flex p-3">
-              <div className="h-10 w-48">
+            <div className="flex items-center p-3">
+              <div className="h-10 w-48 mr-2">
                 <UploadButton
                   onDrop={onDrop}
                   accept="image/*"
@@ -177,35 +176,28 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                   <span className="text-base">Upload New Image</span>
                 </UploadButton>
               </div>
-              <div>
-                <button
-                  onClick={() => toggleColorPicker(!shouldShowColorPicker)}
-                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mx-2"
-                >
-                  Pick Background Color
-                </button>
-                {shouldShowColorPicker ? (
-                  <div className="absolute z-20">
-                    <ChromePicker
-                      color={config.background}
-                      onChange={(color) =>
-                        setConfig({ ...config, background: color.hex })
-                      }
-                    />
-                  </div>
-                ) : null}
-              </div>
-              <div>
-                <button
-                  onClick={() =>
-                    setConfig(() => ({ ...config, isBlured: !config.isBlured }))
+              <div className="mr-2">
+                <ColorPickerButton
+                  color={config.background}
+                  onChange={(color) =>
+                    setConfig({ ...config, background: color })
                   }
-                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700"
-                >{`${
-                  !config.isBlured
-                    ? 'Enable Blur Background'
-                    : 'Disable Blur Background'
-                }`}</button>
+                />
+              </div>
+              <div className="mr-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={config.isBlured}
+                    onClick={() =>
+                      setConfig(() => ({
+                        ...config,
+                        isBlured: !config.isBlured,
+                      }))
+                    }
+                  />
+                  <span className="pl-2">Blur Background</span>
+                </label>
               </div>
             </div>
             <div className="flex flex-row-reverse">
