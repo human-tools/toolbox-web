@@ -2,6 +2,7 @@ import { PhotoIcon } from '@heroicons/react/24/solid';
 import JSZip from 'jszip';
 import { doc } from 'prettier';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { RGBColor } from 'react-color';
 import UploadButton from '../components/UploadButton';
 import {
   DEFAULT_BLUR,
@@ -27,7 +28,7 @@ import {
 } from '../images/ImageCanvasEditor';
 import { ImageData } from '../images/ImagePreview';
 import PhotoCropper, { PhotoCropperRef } from '../images/PhotoCropper';
-import ColorPickerButton from '../ui/ColorPickerButton';
+import ColorPickerButton, { rgbColorToCssRgba } from '../ui/ColorPickerButton';
 
 type Tool = 'crop' | 'frame' | 'adjust';
 
@@ -59,7 +60,7 @@ const BulkEditPhotos = (): JSX.Element => {
   const [saturation, setSaturation] = useState(DEFAULT_SATURATION);
   const [sepia, setSepia] = useState(DEFAULT_SEPIA);
   const [previewSize, setPreviewSize] = useState(250);
-  const [frameColor, setFrameColor] = useState(DEFAULT_FRAME_COLOR);
+  const [frameColor, setFrameColor] = useState<RGBColor>(DEFAULT_FRAME_COLOR);
 
   const onCrop = useCallback(() => {
     const croppedCanvases = cropperRefs.current.map((cropper) => {
@@ -648,7 +649,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             left,
                             bottom,
                             right,
-                            color: frameColor,
+                            color: rgbColorToCssRgba(frameColor),
                           }}
                           brightness={brightness}
                           grayscale={grayscale}
