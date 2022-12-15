@@ -19,10 +19,15 @@ import { LineCapStyle, PDFDocument, rgb } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { RGBColor } from 'react-color';
 import UploadButton from '../components/UploadButton';
 import FabricPagePreview from '../PDFViewer/FabricPagePreview';
 import PagePreview from '../PDFViewer/PagePreview';
-import ColorPickerButton, { hexToRgb } from '../ui/ColorPickerButton';
+import ColorPickerButton, {
+  cssRgbaToRgbColor,
+  DEFAULT_COLOR,
+  rgbColorToCssRgba,
+} from '../ui/ColorPickerButton';
 
 async function createPDF(files: File[]) {
   const pdfDoc = await PDFDocument.create();
@@ -40,7 +45,6 @@ async function createPDF(files: File[]) {
   };
 }
 
-const DEFAULT_COLOR = { red: 0, green: 0, blue: 0 };
 async function drawFabricObjectsOnAllPages(
   pdfDoc: PDFDocument,
   fabricObjects: { [index: number]: any }
@@ -53,8 +57,10 @@ async function drawFabricObjectsOnAllPages(
     newPdfDoc.addPage(page);
     const json = fabricObjects[index + 1];
     json?.objects.forEach((object: any) => {
-      const fill = object.fill ? hexToRgb(object.fill) : DEFAULT_COLOR;
-      const stroke = object.stroke ? hexToRgb(object.stroke) : DEFAULT_COLOR;
+      const fill = object.fill ? cssRgbaToRgbColor(object.fill) : DEFAULT_COLOR;
+      const stroke = object.stroke
+        ? cssRgbaToRgbColor(object.stroke)
+        : DEFAULT_COLOR;
       switch (object.type) {
         // TODO: Maybe add more annotations tools (circle/rect...);
         case 'text':
@@ -73,7 +79,8 @@ async function drawFabricObjectsOnAllPages(
               object.height +
               object.fontSize / 4,
             lineHeight: 100 * object.lineHeight * object.fontSize,
-            color: rgb(fill.red, fill.green, fill.blue),
+            color: rgb(fill.r / 255.0, fill.g / 255.0, fill.b / 255.0),
+            opacity: fill.a,
             size: object.fontSize * object.scaleX,
           });
           break;
@@ -85,7 +92,12 @@ async function drawFabricObjectsOnAllPages(
             .join(' ');
           page.drawSvgPath(path, {
             borderLineCap: LineCapStyle.Round,
-            borderColor: rgb(stroke.red, stroke.green, stroke.blue),
+            borderColor: rgb(
+              stroke.r / 255.0,
+              stroke.g / 255.0,
+              stroke.b / 255.0
+            ),
+            borderOpacity: stroke.a,
             borderWidth: object.strokeWidth,
           });
           break;
@@ -119,6 +131,13 @@ const FONT_SIZES = [
   160,
 ];
 
+const DEFAULT_RGB_COLOR = {
+  r: 0,
+  g: 0,
+  b: 0,
+  a: 1,
+};
+
 const QuickSignPDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
@@ -126,7 +145,7 @@ const QuickSignPDF = (): JSX.Element => {
   const [scale, setScale] = useState(1);
   const [isDrawingMode, setIsDrawingMode] = useState<boolean>(false);
   const [fontSize, setFontSize] = useState<number>(16);
-  const [color, setColor] = useState<string>('#000');
+  const [color, setColor] = useState<RGBColor>(DEFAULT_RGB_COLOR);
   // Tracks all pages drawables so we can burn them to the PDF once the user
   // click Sign & Download. This also allows humans to continue editing different
   // pages.
@@ -224,7 +243,7 @@ const QuickSignPDF = (): JSX.Element => {
     editor.canvas.on('mouse:up', onMouseUp);
     editor.canvas.isDrawingMode = isDrawingMode;
     editor.canvas.freeDrawingBrush.width = fontSize;
-    editor.canvas.freeDrawingBrush.color = color;
+    editor.canvas.freeDrawingBrush.color = rgbColorToCssRgba(color);
 
     return () => {
       if (!editor) return;
@@ -280,7 +299,7 @@ const QuickSignPDF = (): JSX.Element => {
                       fontSize,
                       hasControls: false,
                       width: 400,
-                      fill: color,
+                      fill: rgbColorToCssRgba(color),
                     });
                     editorRef.current.canvas.add(text);
 

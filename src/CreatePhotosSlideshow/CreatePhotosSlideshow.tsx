@@ -1,10 +1,12 @@
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import { useSortable } from '@human-tools/use-sortable';
 import { useCallback, useState } from 'react';
+import { RGBColor } from 'react-color';
 import UploadButton from '../components/UploadButton';
+import { DEFAULT_FRAME_COLOR } from '../images/defaults';
 import { readImageSizing } from '../images/helpers';
 import { ImageData, ImagePreview } from '../images/ImagePreview';
-import ColorPickerButton from '../ui/ColorPickerButton';
+import ColorPickerButton, { rgbColorToHex } from '../ui/ColorPickerButton';
 import Rotator from './Rotator';
 
 const getCleanName = (fileName: string): string => {
@@ -14,7 +16,7 @@ const getCleanName = (fileName: string): string => {
 interface SlideshowConfig {
   isBlured: boolean;
   res: string;
-  background: string;
+  background: RGBColor;
 }
 
 const SLIDESHOW_COMMAND = [
@@ -62,7 +64,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   const [config, setConfig] = useState<SlideshowConfig>({
     isBlured: false,
     res: ASPECT_RATIOS['16:9'],
-    background: '#000000',
+    background: DEFAULT_FRAME_COLOR,
   });
 
   const generateVideo = useCallback(async () => {
@@ -108,7 +110,9 @@ const CreatePhotosSlideshow = (): JSX.Element => {
     } else {
       ffmpegRenderCommand.push('-vf');
       ffmpegRenderCommand.push(
-        `scale=${config.res}:force_original_aspect_ratio=decrease,pad=${config.res}:(ow-iw)/2:(oh-ih)/2:${config.background}`
+        `scale=${config.res}:force_original_aspect_ratio=decrease,pad=${
+          config.res
+        }:(ow-iw)/2:(oh-ih)/2:${rgbColorToHex(config.background)}`
       );
     }
     ffmpegRenderCommand.push('out.mp4');
@@ -178,6 +182,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
               </div>
               <div className="mr-2">
                 <ColorPickerButton
+                  disableAlpha={true}
                   color={config.background}
                   onChange={(color) =>
                     setConfig({ ...config, background: color })
