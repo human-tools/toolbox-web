@@ -13,6 +13,7 @@ interface ImageCanvasEditorProps {
     bottom: number;
     left: number;
     right: number;
+    color: string;
   };
   brightness?: number;
   grayscale?: number;
@@ -83,9 +84,9 @@ export const ImageCanvasEditor = forwardRef<
     canvas.width = srcCanvas.width;
     canvas.height = srcCanvas.height;
     // ctx.scale(0.9, 0.9);
-    ctx.fillStyle = '#fff';
-    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) opacity(${opacity}%) sepia(${sepia}%) grayscale(${grayscale}%) hue-rotate(${hueRotation}deg) saturate(${saturation}%) invert(${invert}%) blur(${blur}px)`;
+    ctx.fillStyle = frame.color || '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) opacity(${opacity}%) sepia(${sepia}%) grayscale(${grayscale}%) hue-rotate(${hueRotation}deg) saturate(${saturation}%) invert(${invert}%) blur(${blur}px)`;
     ctx.drawImage(
       srcCanvas,
       -frame.left,
@@ -97,7 +98,7 @@ export const ImageCanvasEditor = forwardRef<
       srcCanvas.width - frame.right,
       srcCanvas.height - frame.bottom
     );
-  }, [blur, brightness, contrast, frame.bottom, frame.left, frame.right, frame.top, grayscale, hueRotation, invert, opacity, saturation, sepia, srcCanvas]);
+  }, [blur, brightness, contrast, frame.bottom, frame.color, frame.left, frame.right, frame.top, grayscale, hueRotation, invert, opacity, saturation, sepia, srcCanvas]);
   return (
     <div className="flex justify-center">
       <div className="m-0.5">

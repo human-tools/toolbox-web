@@ -8,6 +8,7 @@ import {
   DEFAULT_BOTTOM,
   DEFAULT_BRIGHTNESS,
   DEFAULT_CONTRAST,
+  DEFAULT_FRAME_COLOR,
   DEFAULT_GRAYSCALE,
   DEFAULT_HUE_ROTATION,
   DEFAULT_INVERT,
@@ -26,6 +27,7 @@ import {
 } from '../images/ImageCanvasEditor';
 import { ImageData } from '../images/ImagePreview';
 import PhotoCropper, { PhotoCropperRef } from '../images/PhotoCropper';
+import ColorPickerButton from '../ui/ColorPickerButton';
 
 type Tool = 'crop' | 'frame' | 'adjust';
 
@@ -57,6 +59,7 @@ const BulkEditPhotos = (): JSX.Element => {
   const [saturation, setSaturation] = useState(DEFAULT_SATURATION);
   const [sepia, setSepia] = useState(DEFAULT_SEPIA);
   const [previewSize, setPreviewSize] = useState(250);
+  const [frameColor, setFrameColor] = useState(DEFAULT_FRAME_COLOR);
 
   const onCrop = useCallback(() => {
     const croppedCanvases = cropperRefs.current.map((cropper) => {
@@ -248,6 +251,13 @@ const BulkEditPhotos = (): JSX.Element => {
                     {activeTool === 'frame' && (
                       <div className="flex flex-wrap items-center bg-gray-500  px-2 py-4">
                         <div className="w-full">
+                          <div className="ml-2">
+                            <label className="text-xs text-white">Color</label>
+                            <ColorPickerButton
+                              onChange={(color) => setFrameColor(color)}
+                              color={frameColor}
+                            />
+                          </div>
                           <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
                             <label
                               htmlFor="top-input"
@@ -638,6 +648,7 @@ const BulkEditPhotos = (): JSX.Element => {
                             left,
                             bottom,
                             right,
+                            color: frameColor,
                           }}
                           brightness={brightness}
                           grayscale={grayscale}
