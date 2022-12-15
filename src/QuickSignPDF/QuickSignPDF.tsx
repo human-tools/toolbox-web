@@ -1,15 +1,7 @@
 /**
  * To implement this, the DrawablePagePreview implements a double canvas
  * mechanism that overlay a drawable canvas over the PDF renderer canvas.
- *
- * Limitations:
- *  - Once the user hits download the drawings are BURNED into the PDF pages and
- *    humans can no longer draw on top of it. Not sure why this happens but it seems
- *    it seems we can only burn onto the PDF once. Need investigation.
- *  - We can't currently control the scale of the PDF preview because it affects
- *    the scale the paths are affected in scaled and position.
  */
-
 import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
