@@ -81,7 +81,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
 
     const inputPaths: Array<string> = [];
     for (let i = 0; i < orderedItems.length; i++) {
-      const itemPosition = orderedItems[i];
+      const itemPosition = orderedItems[i] - 1;
       const fileName = getCleanName(files[itemPosition].name);
       inputPaths.push(`file ${fileName}\nduration 1`);
       ffmpeg.FS('writeFile', fileName, await fetchFile(files[itemPosition]));
@@ -126,9 +126,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
 
   const onDrop = useCallback(
     async (newFiles: File[]) => {
-      const newFilesLength = newFiles.length + files.length;
-      setFiles((oldFiles) => [...oldFiles, ...newFiles]);
-      setItems(new Array(newFilesLength).fill(0).map((_, index) => index));
       for (const file of newFiles) {
         const blob = await Rotator.createRotatedImage(file);
         const url = URL.createObjectURL(blob);
@@ -142,8 +139,19 @@ const CreatePhotosSlideshow = (): JSX.Element => {
           },
         ]);
       }
+
+      const oldFilesCount = files.length;
+      const newFilesCount = newFiles.length + oldFilesCount;
+      const newPageCount = Math.abs(newFilesCount - oldFilesCount);
+
+      const newlyAddedPagesOrder = new Array(newPageCount)
+        .fill(0)
+        .map((_, index) => oldFilesCount + index + 1);
+
+      setFiles((oldFiles) => [...oldFiles, ...newFiles]);
+      setItems([...orderedItems, ...newlyAddedPagesOrder]);
     },
-    [files]
+    [files, orderedItems]
   );
 
   const onSave = useCallback(async () => {
@@ -205,7 +213,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                 </label>
               </div>
             </div>
-            <div className="flex flex-row-reverse">
+            <div className="flex flex-row">
               {/* Video */}
               <div className="flex flex-col flex-grow-1 relative align-middle self-center">
                 {!videoSrc && (
@@ -239,14 +247,14 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                 className="flex flex-wrap flex-grow-1 h-full my-1 items-start content-start justify-center m-3 p-2 lg:justify-start"
                 ref={setContainerRef}
               >
-                {orderedItems.map((index) => {
+                {orderedItems.map((position) => {
                   return (
                     <div
                       ref={addDraggableNodeRef}
-                      key={index}
+                      key={position}
                       className=" overflow-hidden border-2 border-white hover:cursor-move"
                     >
-                      <ImagePreview image={images[index]} />
+                      <ImagePreview image={images[position - 1]} />
                     </div>
                   );
                 })}
