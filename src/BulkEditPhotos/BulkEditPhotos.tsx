@@ -61,6 +61,7 @@ const BulkEditPhotos = (): JSX.Element => {
   const [sepia, setSepia] = useState(DEFAULT_SEPIA);
   const [previewSize, setPreviewSize] = useState(250);
   const [frameColor, setFrameColor] = useState<RGBColor>(DEFAULT_FRAME_COLOR);
+  const [downloadSizeScale, setDownloadSizeScale] = useState(1);
 
   const onCrop = useCallback(() => {
     const croppedCanvases = cropperRefs.current.map((cropper) => {
@@ -594,19 +595,46 @@ const BulkEditPhotos = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="flex-grow"></div>
-                <div className="flex w-full sticky bottom-0 lg:static lg:bg-none lg:border-none lg:justify-end lg:shadow-none">
-                  <input
-                    onChange={(e) => setFileName(e.target.value)}
-                    type="text"
-                    className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5 border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
-                    placeholder="name-your-file.zip"
-                  />
-                  <button
-                    className="h-10 self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700"
-                    onClick={onSave}
-                  >
-                    Download
-                  </button>
+                <div className="flex flex-col">
+                  <div className="w-full">
+                    <div className="flex items-start w-40 py-1 px-2 flex-col text-white w-full">
+                      <label
+                        htmlFor="downloadSizeScale-input"
+                        className="text-xs flex w-full"
+                        onDoubleClick={() => setDownloadSizeScale(1)}
+                      >
+                        <span>Download Size Scale</span>
+                        <div className="flex-grow"></div>
+                        <span className="text-xs">{downloadSizeScale}</span>
+                      </label>
+                      <input
+                        className="w-full"
+                        id="downloadSizeScale-input"
+                        type="range"
+                        min={0.1}
+                        max={1}
+                        step={0.05}
+                        value={downloadSizeScale}
+                        onChange={(e) =>
+                          setDownloadSizeScale(Number(e.target.value))
+                        }
+                      />
+                    </div>{' '}
+                  </div>
+                  <div className="flex w-full sticky bottom-0 lg:static lg:bg-none lg:border-none lg:justify-end lg:shadow-none">
+                    <input
+                      onChange={(e) => setFileName(e.target.value)}
+                      type="text"
+                      className="flex-grow h-10 py-0 mr-2 lg:mr-5 px-2 lg:px-5 border-gray-300 placeholder-gray-200 leading-0 lg:leading-3 focus:ring-green-700 lg:max-w-sm"
+                      placeholder="name-your-file.zip"
+                    />
+                    <button
+                      className="h-10 self-end bg-gray-500 text-white px-3 py-2 hover:bg-green-700"
+                      onClick={onSave}
+                    >
+                      Download
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -661,6 +689,7 @@ const BulkEditPhotos = (): JSX.Element => {
                           opacity={opacity}
                           blur={blur}
                           previewSize={previewSize}
+                          downloadSizeScale={downloadSizeScale}
                         />
                       )}
                     </div>

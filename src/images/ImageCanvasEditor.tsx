@@ -25,6 +25,7 @@ interface ImageCanvasEditorProps {
   opacity?: number;
   blur?: number;
   previewSize?: number;
+  downloadSizeScale?: number;
 }
 
 export interface CanvasEditorRef {
@@ -54,6 +55,7 @@ export const ImageCanvasEditor = forwardRef<
     opacity = 100,
     blur = 0,
     previewSize = 100,
+    downloadSizeScale = 1,
   },
   ref
 ): JSX.Element {
@@ -81,8 +83,8 @@ export const ImageCanvasEditor = forwardRef<
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    canvas.width = srcCanvas.width;
-    canvas.height = srcCanvas.height;
+    canvas.width = srcCanvas.width * downloadSizeScale;
+    canvas.height = srcCanvas.height * downloadSizeScale;
     // ctx.scale(0.9, 0.9);
     ctx.fillStyle = frame.color || '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -91,14 +93,14 @@ export const ImageCanvasEditor = forwardRef<
       srcCanvas,
       -frame.left,
       -frame.top,
-      srcCanvas.width,
-      srcCanvas.height,
+      canvas.width / downloadSizeScale,
+      canvas.height / downloadSizeScale,
       0,
       0,
-      srcCanvas.width - frame.right,
-      srcCanvas.height - frame.bottom
+      canvas.width - frame.right,
+      canvas.height - frame.bottom
     );
-  }, [blur, brightness, contrast, frame.bottom, frame.color, frame.left, frame.right, frame.top, grayscale, hueRotation, invert, opacity, saturation, sepia, srcCanvas]);
+  }, [blur, brightness, contrast, downloadSizeScale, frame.bottom, frame.color, frame.left, frame.right, frame.top, grayscale, hueRotation, invert, opacity, saturation, sepia, srcCanvas]);
   return (
     <div className="flex justify-center">
       <div className="m-0.5">
