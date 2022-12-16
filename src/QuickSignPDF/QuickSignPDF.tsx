@@ -1,30 +1,34 @@
 /**
  * To implement this, the DrawablePagePreview implements a double canvas
  * mechanism that overlay a drawable canvas over the PDF renderer canvas.
- *
- * Limitations:
- *  - Once the user hits download the drawings are BURNED into the PDF pages and
- *    humans can no longer draw on top of it. Not sure why this happens but it seems
- *    it seems we can only burn onto the PDF once. Need investigation.
- *  - We can't currently control the scale of the PDF preview because it affects
- *    the scale the paths are affected in scaled and position.
  */
-
 import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
-  PhotoIcon,
+  ArrowUpTrayIcon,
+  CalendarDaysIcon,
+  LanguageIcon,
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
+  PaintBrushIcon,
+  TrashIcon,
 } from '@heroicons/react/24/solid';
 import fabric from 'fabric';
 import { FabricJSEditor } from 'fabricjs-react';
 import { saveAs } from 'file-saver';
-import { PDFDocument, rgb } from 'pdf-lib';
+import { LineCapStyle, PDFDocument, rgb } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { RGBColor } from 'react-color';
 import UploadButton from '../components/UploadButton';
 import FabricPagePreview from '../PDFViewer/FabricPagePreview';
 import PagePreview from '../PDFViewer/PagePreview';
+import ColorPickerButton, {
+  cssRgbaToRgbColor,
+  DEFAULT_COLOR,
+  rgbColorToCssRgba,
+} from '../ui/ColorPickerButton';
 
 async function createPDF(files: File[]) {
   const pdfDoc = await PDFDocument.create();
@@ -54,6 +58,10 @@ async function drawFabricObjectsOnAllPages(
     newPdfDoc.addPage(page);
     const json = fabricObjects[index + 1];
     json?.objects.forEach((object: any) => {
+      const fill = object.fill ? cssRgbaToRgbColor(object.fill) : DEFAULT_COLOR;
+      const stroke = object.stroke
+        ? cssRgbaToRgbColor(object.stroke)
+        : DEFAULT_COLOR;
       switch (object.type) {
         // TODO: Maybe add more annotations tools (circle/rect...);
         case 'text':
@@ -66,18 +74,33 @@ async function drawFabricObjectsOnAllPages(
             // page.getHeight() is used here to transform the y location
             // since PDF coordinate space top-bottom is 0,0 vs fabric canvas
             // which has top-left 0,0
-            y: page.getHeight() - object.top - object.height + 4,
-            lineHeight: object.lineHeight,
-            color: rgb(0, 0, 0),
+            y:
+              page.getHeight() -
+              object.top -
+              object.height +
+              object.fontSize / 4,
+            lineHeight: 100 * object.lineHeight * object.fontSize,
+            color: rgb(fill.r / 255.0, fill.g / 255.0, fill.b / 255.0),
+            opacity: fill.a,
             size: object.fontSize * object.scaleX,
           });
           break;
         case 'path':
+          console.log(object);
           page.moveTo(0, page.getHeight());
           const path = object.path
             .map((commandArr: (string | number)[]) => commandArr.join(' '))
             .join(' ');
-          page.drawSvgPath(path);
+          page.drawSvgPath(path, {
+            borderLineCap: LineCapStyle.Round,
+            borderColor: rgb(
+              stroke.r / 255.0,
+              stroke.g / 255.0,
+              stroke.b / 255.0
+            ),
+            borderOpacity: stroke.a,
+            borderWidth: object.strokeWidth,
+          });
           break;
       }
     });
@@ -89,13 +112,41 @@ async function drawFabricObjectsOnAllPages(
   };
 }
 
+const FONT_SIZES = [
+  1,
+  2,
+  4,
+  8,
+  12,
+  16,
+  24,
+  32,
+  36,
+  40,
+  48,
+  60,
+  64,
+  80,
+  96,
+  128,
+  160,
+];
+
+const DEFAULT_RGB_COLOR = {
+  r: 0,
+  g: 0,
+  b: 0,
+  a: 1,
+};
+
 const QuickSignPDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
   const [activePage, setActivePage] = useState<number>(1);
   const [scale, setScale] = useState(1);
   const [isDrawingMode, setIsDrawingMode] = useState<boolean>(false);
-
+  const [fontSize, setFontSize] = useState<number>(16);
+  const [color, setColor] = useState<RGBColor>(DEFAULT_RGB_COLOR);
   // Tracks all pages drawables so we can burn them to the PDF once the user
   // click Sign & Download. This also allows humans to continue editing different
   // pages.
@@ -192,11 +243,14 @@ const QuickSignPDF = (): JSX.Element => {
     }
     editor.canvas.on('mouse:up', onMouseUp);
     editor.canvas.isDrawingMode = isDrawingMode;
+    editor.canvas.freeDrawingBrush.width = fontSize;
+    editor.canvas.freeDrawingBrush.color = rgbColorToCssRgba(color);
+
     return () => {
       if (!editor) return;
       editor.canvas.off('mouse:up', onMouseUp);
     };
-  }, [isDrawingMode, updatePageObjects]);
+  }, [color, fontSize, isDrawingMode, updatePageObjects]);
 
   return (
     <div className="h-full flex flex-col">
@@ -210,113 +264,153 @@ const QuickSignPDF = (): JSX.Element => {
           {pdf && (
             <div className="flex flex-col flex-grow">
               {/* Toolbar */}
-              <div className="flex p-3">
+              <div className="flex items-center p-3">
                 <div className="h-10 w-48 mr-2">
                   <UploadButton onDrop={onDrop} accept=".pdf" fullSized={false}>
-                    <span className="text-base">Upload New File</span>
+                    <div className="flex items-center text-center">
+                      <ArrowUpTrayIcon className="h-5 mr-2" />
+                      <span className="text-base">Sign a New File</span>
+                    </div>
                   </UploadButton>
                 </div>
-                <>
-                  <div>
-                    <button
-                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
-                      onClick={() => {
-                        if (!editorRef.current) return;
-                        setIsDrawingMode(false);
-                        const text = new fabric.fabric.Textbox('Hello', {
-                          fontFamily: 'Helvetica',
-                          fontSize: 16,
-                          hasControls: false,
-                          width: 400,
-                        });
-                        editorRef.current.canvas.add(text);
+                <div>
+                  <select
+                    className="border border-gray-100"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                  >
+                    {FONT_SIZES.map((size) => (
+                      <option value={size}>{size}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="ml-2">
+                  <ColorPickerButton
+                    onChange={(color) => setColor(color)}
+                    color={color}
+                  />
+                </div>
+                <button
+                  className=" text-gray-500 px-3 py-2  hover:text-green-700 mr-2"
+                  onClick={() => {
+                    if (!editorRef.current) return;
+                    setIsDrawingMode(false);
+                    const text = new fabric.fabric.Textbox('Hello', {
+                      fontFamily: 'Helvetica',
+                      fontSize,
+                      hasControls: false,
+                      width: 400,
+                      fill: rgbColorToCssRgba(color),
+                      top: 100,
+                      left: 100,
+                    });
+                    editorRef.current.canvas.add(text);
 
-                        updatePageObjects();
-                      }}
-                    >
-                      Add Text
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
-                      onClick={() => {
-                        if (!editorRef.current) return;
-                        setIsDrawingMode((isDrawingMode) => !isDrawingMode);
-                      }}
-                    >
-                      {isDrawingMode ? 'Stop Drawing' : 'Start Drawing'}
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
-                      onClick={() => {
-                        editorRef.current?.deleteAll();
-                        updatePageObjects();
-                      }}
-                    >
-                      Clear
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
-                      onClick={() => {
-                        editorRef.current?.deleteSelected();
-                        updatePageObjects();
-                      }}
-                    >
-                      Delete Selected
-                    </button>
-                  </div>
-                </>
+                    updatePageObjects();
+                  }}
+                >
+                  <LanguageIcon className="w-5" />
+                </button>
+                <button
+                  className=" text-gray-500 px-3 py-2  hover:text-green-700 mr-2"
+                  onClick={() => {
+                    if (!editorRef.current) return;
+                    setIsDrawingMode(false);
+                    const text = new fabric.fabric.Textbox(
+                      new Date().toLocaleDateString(),
+                      {
+                        fontFamily: 'Helvetica',
+                        fontSize,
+                        hasControls: false,
+                        width: 400,
+                        fill: rgbColorToCssRgba(color),
+                        top: 100,
+                        left: 100,
+                      }
+                    );
+                    editorRef.current.canvas.add(text);
+
+                    updatePageObjects();
+                  }}
+                >
+                  <CalendarDaysIcon className="w-5" />
+                </button>
+
+                <button
+                  className=" text-gray-500 px-1  hover:text-green-700 mr-2"
+                  onClick={() => {
+                    if (!editorRef.current) return;
+                    setIsDrawingMode((isDrawingMode) => !isDrawingMode);
+                  }}
+                >
+                  {isDrawingMode ? (
+                    <PaintBrushIcon className="w-5" fill="text-green-500" />
+                  ) : (
+                    <PaintBrushIcon className="w-5" />
+                  )}
+                </button>
+                <button
+                  className="flex  text-gray-500 px-1  hover:text-green-700 mr-2"
+                  onClick={() => {
+                    editorRef.current?.deleteAll();
+                    updatePageObjects();
+                  }}
+                >
+                  <TrashIcon className="w-5" />
+                  <span>All</span>
+                </button>
+                <button
+                  className="flex text-gray-500 px-1 hover:text-green-700 mr-2"
+                  onClick={() => {
+                    editorRef.current?.deleteSelected();
+                    updatePageObjects();
+                  }}
+                >
+                  <TrashIcon className="w-5" />
+                  <span>Selected</span>
+                </button>
 
                 <div className="flex-grow"></div>
                 <div className="flex items-center">
                   <button
                     disabled={!pdf || activePage > (doc?.getPageCount() || 1)}
-                    className={` text-gray-500 px-3 py-2 ${
+                    className={` text-gray-500 px-1 ${
                       activePage <= 1
                         ? 'cursor-not-allowed	'
                         : 'hover:text-green-700'
                     }`}
                     onClick={prevPage}
                   >
-                    <ArrowLeftCircleIcon className="h-8" />
+                    <ArrowLeftCircleIcon className="w-5" />
                   </button>
                   <span className="px-2 text-gray-500">
                     Page ({activePage} of {doc?.getPageCount()})
                   </span>
                   <button
                     disabled={!pdf || activePage >= (doc?.getPageCount() || 1)}
-                    className={` text-gray-500 px-3 py-2  ${
+                    className={` text-gray-500 px-1  ${
                       activePage >= doc!.getPageCount()
                         ? 'cursor-not-allowed	'
                         : 'hover:text-green-700'
                     }`}
                     onClick={nextPage}
                   >
-                    <ArrowRightCircleIcon className="h-8" />
+                    <ArrowRightCircleIcon className="w-5" />
                   </button>
-                </div>
-                <div>
-                  <div className="flex justify-start align-top items-end ml-2">
-                    <button
-                      className="h-5 bg-gray-500 text-white px-1 hover:bg-green-700 mr-2"
-                      onClick={() => setScale((scale) => scale / 1.2)}
-                      disabled={!pdf}
-                    >
-                      <PhotoIcon className="w-3" />
-                    </button>
-                    <button
-                      className="h-8 bg-gray-500 text-white px-1 hover:bg-green-700"
-                      onClick={() => setScale((scale) => scale * 1.2)}
-                      disabled={!pdf}
-                    >
-                      <PhotoIcon className="w-5" />
-                    </button>
-                  </div>{' '}
+                  <button
+                    className="h-8 text-gray-500 px-1 hover:text-green-700"
+                    onClick={() => setScale((scale) => scale / 1.2)}
+                    disabled={!pdf}
+                  >
+                    <MagnifyingGlassMinusIcon className="w-5" />
+                  </button>
+                  <button
+                    className="h-8 text-gray-500 px-1 hover:text-green-700"
+                    onClick={() => setScale((scale) => scale * 1.2)}
+                    disabled={!pdf}
+                  >
+                    <MagnifyingGlassPlusIcon className="w-5" />
+                  </button>
                 </div>
               </div>
               {pdf && (

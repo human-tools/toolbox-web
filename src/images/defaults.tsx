@@ -1,3 +1,5 @@
+import { RGBColor } from 'react-color';
+
 export const DEFAULT_TOP = 0;
 export const DEFAULT_LEFT = 0;
 export const DEFAULT_BOTTOM = 0;
@@ -13,6 +15,12 @@ export const DEFAULT_INVERT = 0;
 export const DEFAULT_OPACITY = 100;
 export const DEFAULT_SATURATION = 100;
 export const DEFAULT_SEPIA = 0;
+export const DEFAULT_FRAME_COLOR: RGBColor = {
+  r: 0,
+  g: 0,
+  b: 0,
+  a: 1,
+};
 
 export const SOCIAL_PHOTO_SIZES = [
   { label: 'YouTube Thumbnail', width: 1280, height: 720 },

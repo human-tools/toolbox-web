@@ -54,8 +54,10 @@ const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
 
   const onFabricReady = useCallback(
     (canvas) => {
-      canvas.width = viewport!.width;
-      canvas.height = viewport!.height;
+      if (viewport) {
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+      }
       canvas.setZoom(scale || 1);
       onReady(canvas);
     },
@@ -67,8 +69,11 @@ const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
   }, [load]);
 
   useEffect(() => {
-    editor?.canvas.setZoom(scale || 1);
-  }, [editor?.canvas, scale]);
+    if (!viewport || !editor) return;
+    editor.canvas.setZoom(scale || 1);
+    editor.canvas.setWidth(viewport.width);
+    editor.canvas.setHeight(viewport.height);
+  }, [editor, scale, viewport]);
 
   return (
     <div className="relative">
@@ -80,7 +85,7 @@ const FabricPagePreview = forwardRef<FabricJSEditor, Props>(function (
         height={viewport?.height}
       ></canvas>
       {/* Drawing Canvas */}
-      {viewport && (
+      {scale && (
         <FabricJSCanvas
           className="absolute top-0 right-0 left-0 bottom-0"
           onReady={onFabricReady}

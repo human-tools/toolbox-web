@@ -1,10 +1,12 @@
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import { useSortable } from '@human-tools/use-sortable';
 import { useCallback, useState } from 'react';
-import { ChromePicker } from 'react-color';
+import { RGBColor } from 'react-color';
 import UploadButton from '../components/UploadButton';
+import { DEFAULT_FRAME_COLOR } from '../images/defaults';
 import { readImageSizing } from '../images/helpers';
 import { ImageData, ImagePreview } from '../images/ImagePreview';
+import ColorPickerButton, { rgbColorToHex } from '../ui/ColorPickerButton';
 import Rotator from './Rotator';
 
 const getCleanName = (fileName: string): string => {
@@ -14,7 +16,7 @@ const getCleanName = (fileName: string): string => {
 interface SlideshowConfig {
   isBlured: boolean;
   res: string;
-  background: string;
+  background: RGBColor;
 }
 
 const SLIDESHOW_COMMAND = [
@@ -45,7 +47,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [images, setImages] = useState<ImageData[]>([]);
-  const [shouldShowColorPicker, toggleColorPicker] = useState<boolean>(false);
   const {
     orderedItems,
     setItems,
@@ -63,7 +64,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   const [config, setConfig] = useState<SlideshowConfig>({
     isBlured: false,
     res: ASPECT_RATIOS['16:9'],
-    background: '#000000',
+    background: DEFAULT_FRAME_COLOR,
   });
 
   const generateVideo = useCallback(async () => {
@@ -80,7 +81,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
 
     const inputPaths: Array<string> = [];
     for (let i = 0; i < orderedItems.length; i++) {
-      const itemPosition = orderedItems[i];
+      const itemPosition = orderedItems[i] - 1;
       const fileName = getCleanName(files[itemPosition].name);
       inputPaths.push(`file ${fileName}\nduration 1`);
       ffmpeg.FS('writeFile', fileName, await fetchFile(files[itemPosition]));
@@ -109,7 +110,9 @@ const CreatePhotosSlideshow = (): JSX.Element => {
     } else {
       ffmpegRenderCommand.push('-vf');
       ffmpegRenderCommand.push(
-        `scale=${config.res}:force_original_aspect_ratio=decrease,pad=${config.res}:(ow-iw)/2:(oh-ih)/2:${config.background}`
+        `scale=${config.res}:force_original_aspect_ratio=decrease,pad=${
+          config.res
+        }:(ow-iw)/2:(oh-ih)/2:${rgbColorToHex(config.background)}`
       );
     }
     ffmpegRenderCommand.push('out.mp4');
@@ -123,9 +126,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
 
   const onDrop = useCallback(
     async (newFiles: File[]) => {
-      const newFilesLength = newFiles.length + files.length;
-      setFiles((oldFiles) => [...oldFiles, ...newFiles]);
-      setItems(new Array(newFilesLength).fill(0).map((_, index) => index));
       for (const file of newFiles) {
         const blob = await Rotator.createRotatedImage(file);
         const url = URL.createObjectURL(blob);
@@ -139,8 +139,19 @@ const CreatePhotosSlideshow = (): JSX.Element => {
           },
         ]);
       }
+
+      const oldFilesCount = files.length;
+      const newFilesCount = newFiles.length + oldFilesCount;
+      const newPageCount = Math.abs(newFilesCount - oldFilesCount);
+
+      const newlyAddedPagesOrder = new Array(newPageCount)
+        .fill(0)
+        .map((_, index) => oldFilesCount + index + 1);
+
+      setFiles((oldFiles) => [...oldFiles, ...newFiles]);
+      setItems([...orderedItems, ...newlyAddedPagesOrder]);
     },
-    [files]
+    [files, orderedItems]
   );
 
   const onSave = useCallback(async () => {
@@ -167,8 +178,8 @@ const CreatePhotosSlideshow = (): JSX.Element => {
         {orderedItems.length > 0 && (
           <div className="flex flex-col flex-grow m-3 lg:ml-0">
             {/* Top Toolbar */}
-            <div className="flex p-3">
-              <div className="h-10 w-48">
+            <div className="flex items-center p-3">
+              <div className="h-10 w-48 mr-2">
                 <UploadButton
                   onDrop={onDrop}
                   accept="image/*"
@@ -177,38 +188,32 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                   <span className="text-base">Upload New Image</span>
                 </UploadButton>
               </div>
-              <div>
-                <button
-                  onClick={() => toggleColorPicker(!shouldShowColorPicker)}
-                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mx-2"
-                >
-                  Pick Background Color
-                </button>
-                {shouldShowColorPicker ? (
-                  <div className="absolute z-20">
-                    <ChromePicker
-                      color={config.background}
-                      onChange={(color) =>
-                        setConfig({ ...config, background: color.hex })
-                      }
-                    />
-                  </div>
-                ) : null}
-              </div>
-              <div>
-                <button
-                  onClick={() =>
-                    setConfig(() => ({ ...config, isBlured: !config.isBlured }))
+              <div className="mr-2">
+                <ColorPickerButton
+                  disableAlpha={true}
+                  color={config.background}
+                  onChange={(color) =>
+                    setConfig({ ...config, background: color })
                   }
-                  className="h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700"
-                >{`${
-                  !config.isBlured
-                    ? 'Enable Blur Background'
-                    : 'Disable Blur Background'
-                }`}</button>
+                />
+              </div>
+              <div className="mr-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={config.isBlured}
+                    onClick={() =>
+                      setConfig(() => ({
+                        ...config,
+                        isBlured: !config.isBlured,
+                      }))
+                    }
+                  />
+                  <span className="pl-2">Blur Background</span>
+                </label>
               </div>
             </div>
-            <div className="flex flex-row-reverse">
+            <div className="flex flex-row">
               {/* Video */}
               <div className="flex flex-col flex-grow-1 relative align-middle self-center">
                 {!videoSrc && (
@@ -242,14 +247,14 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                 className="flex flex-wrap flex-grow-1 h-full my-1 items-start content-start justify-center m-3 p-2 lg:justify-start"
                 ref={setContainerRef}
               >
-                {orderedItems.map((index) => {
+                {orderedItems.map((position) => {
                   return (
                     <div
                       ref={addDraggableNodeRef}
-                      key={index}
+                      key={position}
                       className=" overflow-hidden border-2 border-white hover:cursor-move"
                     >
-                      <ImagePreview image={images[index]} />
+                      <ImagePreview image={images[position - 1]} />
                     </div>
                   );
                 })}
