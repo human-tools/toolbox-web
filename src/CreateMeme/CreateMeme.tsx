@@ -17,20 +17,24 @@ const CreateMeme = (): JSX.Element => {
     `new-meme-${new Date().getTime()}.png`
   );
 
-  const onDrop = useCallback(async (files) => {
-    wasImageLoadedToCanvas = false;
-    if (files.length === 0 || files.length > 1) return;
-    setImagePath(URL.createObjectURL(files[0]));
-  }, []);
+  const onDrop = useCallback(
+    async (files) => {
+      wasImageLoadedToCanvas = false;
+      if (files.length === 0 || files.length > 1) return;
+      setImagePath(URL.createObjectURL(files[0]));
+    },
+    [editor]
+  );
 
   useEffect(() => {
     if (!imagePath || wasImageLoadedToCanvas || !editor) return;
     editor?.deleteAll();
+    wasImageLoadedToCanvas = true;
     fabric.Image.fromURL(
       imagePath,
       function (oImg: any) {
         const aspectRatio = oImg.width / oImg.height;
-        const width = 500;
+        const width = 600;
         const height = width / aspectRatio;
         oImg.scaleToWidth(width);
         oImg.scaleToHeight(height);
@@ -38,9 +42,7 @@ const CreateMeme = (): JSX.Element => {
           width: width,
           height: height,
         });
-
-        editor?.canvas.sendToBack(oImg);
-        wasImageLoadedToCanvas = true;
+        editor?.canvas.add(oImg);
       },
       {
         selectable: false,
