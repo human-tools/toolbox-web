@@ -74,6 +74,14 @@ const ToolsNav = ({
       >
         Bulk-Edit Photos
       </NavLink>
+      <NavLink
+        exact
+        className={className}
+        activeClassName={activeClassName}
+        to="/create-meme"
+      >
+        Create Meme
+      </NavLink>
       {showTodo && (
         <>
           <NavLink
@@ -102,15 +110,6 @@ const ToolsNav = ({
           >
             <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
             Make GIF
-          </NavLink>
-          <NavLink
-            exact
-            className={className}
-            activeClassName={activeClassName}
-            to="/create-meme"
-          >
-            <span className="text-xs bg-green-500 px-1 text-white">TODO</span>{' '}
-            Create Meme
           </NavLink>
         </>
       )}
