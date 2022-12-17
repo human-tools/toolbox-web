@@ -10,6 +10,7 @@ import workerContent from './pdfjs.worker.min.json';
 import QuickSignPDF from './QuickSignPDF/QuickSignPDF';
 import SplitPDF from './SplitPDF/SplitPDF';
 import ToolsNav from './ToolsNav/ToolsNav';
+import CreateMeme from './CreateMeme/CreateMeme';
 
 const workerBlob = new Blob([workerContent], { type: 'text/javascript' });
 const workerBlobURL = URL.createObjectURL(workerBlob);
@@ -46,6 +47,9 @@ export const App = (): JSX.Element => {
                 </Route>
                 <Route path="/bulk-edit-photos" exact>
                   <BulkEditPhotos />
+                </Route>
+                <Route path="/create-meme" exact>
+                  <CreateMeme />
                 </Route>
                 <Route path="/*">
                   <div className="p-4 flex flex-col justify-center items-center content-center h-full">
