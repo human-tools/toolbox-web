@@ -67,20 +67,24 @@ const CreateMeme = (): JSX.Element => {
 
   useEffect(() => {
     if (!editor) return;
-    if (allCaps) applyAllCaps();
     if (!imagePath || wasImageLoadedToCanvas) return;
     loadImageToCanvas(imagePath);
-  }, [imagePath, allCaps, fabric, editor]);
+  }, [imagePath, fabric, editor]);
 
-  const applyAllCaps = useCallback(() => {
-    editor?.canvas
-      .getObjects()
-      .filter((currentObject) => currentObject.get('type') == 'textbox')
-      .map((textObj: any) => {
-        textObj.set('text', textObj.text.toUpperCase());
-        editor.canvas.requestRenderAll();
+  useEffect(() => {
+    if (!editor) return;
+    if (allCaps) {
+      editor.canvas.on('text:changed', (e) => {
+        const textObj: any = e.target;
+        if (allCaps) textObj.set('text', textObj.text.toUpperCase());
       });
-  }, [editor]);
+    } else {
+      editor.canvas.off('text:changed');
+    }
+    return () => {
+      editor.canvas.off('text:changed');
+    };
+  }, [allCaps, editor]);
 
   const loadImageToCanvas = useCallback(
     (imagePath) => {
@@ -126,7 +130,7 @@ const CreateMeme = (): JSX.Element => {
     [editor]
   );
 
-  const setRotateAndFlip = useCallback(
+  const applyRotateAndFlip = useCallback(
     (doItToMe: string) => {
       if (!editor || !originalImage) return;
       if (doItToMe == 'rotate') {
@@ -273,7 +277,7 @@ const CreateMeme = (): JSX.Element => {
                 <button
                   className="ml-2 h-10 self-end bg-gray-500 text-white px-3 py-2  hover:bg-green-700 mr-2"
                   onClick={() => {
-                    setRotateAndFlip('rotate');
+                    applyRotateAndFlip('rotate');
                   }}
                 >
                   Rotate
@@ -285,7 +289,7 @@ const CreateMeme = (): JSX.Element => {
                     flipVertical ? 'bg-green-700' : 'bg-gray-500'
                   } text-white px-3 py-2  hover:bg-green-700 mr-2`}
                   onClick={() => {
-                    setRotateAndFlip('vertical');
+                    applyRotateAndFlip('vertical');
                   }}
                 >
                   Flip Vertical
@@ -297,7 +301,7 @@ const CreateMeme = (): JSX.Element => {
                     flipHorizontal ? 'bg-green-700' : 'bg-gray-500'
                   } text-white px-3 py-2  hover:bg-green-700 mr-2`}
                   onClick={() => {
-                    setRotateAndFlip('horizontal');
+                    applyRotateAndFlip('horizontal');
                   }}
                 >
                   Flip Horizontal
