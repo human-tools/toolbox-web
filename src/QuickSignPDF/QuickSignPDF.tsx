@@ -123,6 +123,7 @@ async function drawFabricObjectsOnAllPages(
           console.log(object);
           page.moveTo(0, page.getHeight());
           const xSign = Math.sign(object.path[0][1] - object.path[1][1]);
+          const ySign = Math.sign(object.path[0][2] - object.path[1][2]);
           const path = offsetPath(object.path)
             .map((commandArr: (string | number)[]) => commandArr.join(' '))
             .join(' ');
@@ -136,7 +137,12 @@ async function drawFabricObjectsOnAllPages(
             borderOpacity: stroke.a,
             borderWidth: object.strokeWidth,
             x: object.left + (xSign > 0 ? object.width : 0),
-            y: page.getHeight() - object.top - object.height - 7,
+            y:
+              page.getHeight() -
+              object.top -
+              object.height -
+              7 +
+              (ySign < 0 ? object.height : 0),
           });
           break;
       }
