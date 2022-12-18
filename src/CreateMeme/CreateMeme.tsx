@@ -97,7 +97,6 @@ const CreateMeme = (): JSX.Element => {
     function onKeyDown(options: any) {
       if (options.repeat) return;
 
-      console.log(options);
       const key = options.key;
       const isAKeyDown = key == 'a';
       const isDKeyDown = key == 'd';
@@ -165,7 +164,6 @@ const CreateMeme = (): JSX.Element => {
   );
 
   const selectAllTextObjects = useCallback(() => {
-    console.log(editor);
     editor?.canvas.discardActiveObject();
     const sel = new fabric.ActiveSelection(
       editor?.canvas.getObjects().filter((obj) => obj.get('type') == 'textbox'),
