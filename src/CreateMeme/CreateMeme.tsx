@@ -42,14 +42,15 @@ let wasImageLoadedToCanvas = false;
 
 const CreateMeme = (): JSX.Element => {
   const { editor, onReady } = useFabricJSEditor();
+  const [listenersLoaded, setListenersLoaded] = useState<boolean>(false);
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [originalImage, setOriginalImage] = useState<any>({});
   const [fontSize, setFontSize] = useState<number>(48);
   const [fontWeight, setFontWeight] = useState<string>('bold');
-  const [color, setColor] = useState<RGBColor>(DEFAULT_RGB_COLOR);
-  const [rotation, setRotation] = useState<number>(0);
+  const [fill, setFill] = useState<RGBColor>(DEFAULT_RGB_COLOR);
   const [textAlign, setTextAlign] = useState<string>('center');
   const [allCaps, setAllCaps] = useState<boolean>(false);
+  const [rotation, setRotation] = useState<number>(0);
   const [flipHorizontal, setFlipHorizontal] = useState<boolean>(false);
   const [flipVertical, setFlipVertical] = useState<boolean>(false);
   const [fileName, setFileName] = useState<string>(
@@ -73,18 +74,51 @@ const CreateMeme = (): JSX.Element => {
 
   useEffect(() => {
     if (!editor) return;
-    if (allCaps) {
-      editor.canvas.on('text:changed', (e) => {
-        const textObj: any = e.target;
-        if (allCaps) textObj.set('text', textObj.text.toUpperCase());
-      });
-    } else {
-      editor.canvas.off('text:changed');
+
+    function textChanged(e: any) {
+      const textObj = e.target;
+      textObj.set('text', textObj.text.toUpperCase());
     }
+
+    if (allCaps) {
+      editor.canvas.on('text:changed', textChanged);
+    } else {
+      editor.canvas.off('text:changed', textChanged);
+    }
+
     return () => {
-      editor.canvas.off('text:changed');
+      editor.canvas.off('text:changed', textChanged);
     };
   }, [allCaps, editor]);
+
+  useEffect(() => {
+    if (!editor || listenersLoaded) return;
+
+    function onKeyDown(options: any) {
+      if (options.repeat) return;
+
+      console.log(options);
+      const key = options.key;
+      const isAKeyDown = key == 'a';
+      const isDKeyDown = key == 'd';
+      const shouldSelectAll =
+        (isAKeyDown && options.ctrlKey) || (isAKeyDown && options.metaKey);
+      const shouldDeselectAll =
+        (isDKeyDown && options.ctrlKey) || (isDKeyDown && options.metaKey);
+      const shouldDeleteSelected = key == 'Backspace';
+
+      if (shouldSelectAll) {
+        selectAllTextObjects();
+      } else if (shouldDeselectAll) {
+        deselectAllTextObjects();
+      } else if (shouldDeleteSelected) {
+        deleteSelectedObjects();
+      }
+    }
+
+    fabric.util.addListener(document.body, 'keydown', onKeyDown);
+    setListenersLoaded(true);
+  }, [editor, listenersLoaded]);
 
   const loadImageToCanvas = useCallback(
     (imagePath) => {
@@ -117,30 +151,56 @@ const CreateMeme = (): JSX.Element => {
   );
 
   const updateSelectedEditorText = useCallback(
-    (operation: string, value: string | number) => {
+    (prop: string, value: string | number) => {
       if (!editor) return;
       const activeObjects: any = editor.canvas.getActiveObjects();
       if (!activeObjects) return;
       for (const activeObject of activeObjects) {
         const isTextType = activeObject.get('type') == 'textbox';
-        if (isTextType) activeObject.set(operation, value);
+        if (isTextType) activeObject.set(prop, value);
       }
       editor.canvas.requestRenderAll();
     },
     [editor]
   );
 
+  const selectAllTextObjects = useCallback(() => {
+    console.log(editor);
+    editor?.canvas.discardActiveObject();
+    const sel = new fabric.ActiveSelection(
+      editor?.canvas.getObjects().filter((obj) => obj.get('type') == 'textbox'),
+      {
+        canvas: editor?.canvas,
+      }
+    );
+    editor?.canvas.setActiveObject(sel);
+    editor?.canvas.requestRenderAll();
+  }, [editor]);
+
+  const deselectAllTextObjects = useCallback(() => {
+    if (!editor) return;
+    editor.canvas.discardActiveObject();
+    editor.canvas.requestRenderAll();
+  }, [editor]);
+
+  const deleteSelectedObjects = useCallback(() => {
+    if (!editor) return;
+    editor.canvas.getActiveObjects().map((obj) => editor.canvas.remove(obj));
+    editor.canvas.discardActiveObject();
+    editor.canvas.requestRenderAll();
+  }, [editor]);
+
   const applyRotateAndFlip = useCallback(
-    (doItToMe: string) => {
+    (operation: string) => {
       if (!editor || !originalImage) return;
-      if (doItToMe == 'rotate') {
+      if (operation == 'rotate') {
         const angle = rotation + 90;
         setRotation(angle);
         originalImage.rotate(angle);
-      } else if (doItToMe == 'horizontal') {
+      } else if (operation == 'horizontal') {
         setFlipHorizontal(!flipHorizontal);
         originalImage.set('flipX', !flipHorizontal);
-      } else if (doItToMe == 'vertical') {
+      } else if (operation == 'vertical') {
         setFlipVertical(!flipVertical);
         originalImage.set('flipY', !flipVertical);
       }
@@ -205,10 +265,10 @@ const CreateMeme = (): JSX.Element => {
               <div className="ml-2">
                 <ColorPickerButton
                   onChange={(color) => {
-                    setColor(color);
-                    updateSelectedEditorText('fill', rgbColorToCssRgba(color));
+                    setFill(color);
+                    updateSelectedEditorText('fill', rgbColorToCssRgba(fill));
                   }}
-                  color={color}
+                  color={fill}
                 />
               </div>
               <div>
@@ -262,7 +322,7 @@ const CreateMeme = (): JSX.Element => {
                       textAlign,
                       fontWeight,
                       fontSize,
-                      fill: rgbColorToCssRgba(color),
+                      fill: rgbColorToCssRgba(fill),
                       shadow: MEME_TEXT_SHADOW,
                       hasControls: true,
                       width: 400,
