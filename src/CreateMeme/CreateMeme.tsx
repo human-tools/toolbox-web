@@ -164,15 +164,16 @@ const CreateMeme = (): JSX.Element => {
   );
 
   const selectAllTextObjects = useCallback(() => {
-    editor?.canvas.discardActiveObject();
+    if (!editor) return;
+    editor.canvas.discardActiveObject();
     const sel = new fabric.ActiveSelection(
-      editor?.canvas.getObjects().filter((obj) => obj.get('type') == 'textbox'),
+      editor.canvas.getObjects().filter((obj) => obj.get('type') == 'textbox'),
       {
         canvas: editor?.canvas,
       }
     );
-    editor?.canvas.setActiveObject(sel);
-    editor?.canvas.requestRenderAll();
+    editor.canvas.setActiveObject(sel);
+    editor.canvas.requestRenderAll();
   }, [editor]);
 
   const deselectAllTextObjects = useCallback(() => {
