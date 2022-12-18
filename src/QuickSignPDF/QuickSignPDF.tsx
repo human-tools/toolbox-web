@@ -30,6 +30,40 @@ import ColorPickerButton, {
   rgbColorToCssRgba,
 } from '../ui/ColorPickerButton';
 
+function offsetPath(path: any[][]) {
+  // Get the starting position of the path
+  const startX = path[0][1];
+  const startY = path[0][2];
+
+  // Create a new empty array to hold the offsetted path
+  const offsettedPath = [];
+
+  // Loop through the original path array
+  for (let i = 0; i < path.length; i++) {
+    const command = path[i];
+    // If the command is a moveto command, offset the starting position by the starting position of the original path
+    if (command[0] === 'M') {
+      offsettedPath.push([
+        command[0],
+        command[1] - startX,
+        command[2] - startY,
+      ]);
+    }
+    // If the command is a curve command, offset the control points and end point by the starting position of the original path
+    else {
+      offsettedPath.push([
+        command[0],
+        command[1] - startX,
+        command[2] - startY,
+        command[3] - startX,
+        command[4] - startY,
+      ]);
+    }
+  }
+
+  return offsettedPath;
+}
+
 async function createPDF(files: File[]) {
   const pdfDoc = await PDFDocument.create();
 
@@ -88,7 +122,10 @@ async function drawFabricObjectsOnAllPages(
         case 'path':
           console.log(object);
           page.moveTo(0, page.getHeight());
-          const path = object.path
+          const xSign = Math.sign(object.path[0][1] - object.path[1][1]);
+          const ySign = Math.sign(object.path[0][2] - object.path[1][2]);
+          console.log({ xSign, ySign });
+          const path = offsetPath(object.path)
             .map((commandArr: (string | number)[]) => commandArr.join(' '))
             .join(' ');
           page.drawSvgPath(path, {
@@ -100,6 +137,13 @@ async function drawFabricObjectsOnAllPages(
             ),
             borderOpacity: stroke.a,
             borderWidth: object.strokeWidth,
+            x: object.left + (xSign >= 0 ? object.width : 0),
+            y:
+              page.getHeight() -
+              object.top -
+              object.height -
+              7 +
+              (ySign < 0 ? object.height : 0),
           });
           break;
       }
