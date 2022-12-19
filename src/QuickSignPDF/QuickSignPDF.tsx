@@ -7,20 +7,23 @@ import {
   ArrowRightCircleIcon,
   ArrowUpTrayIcon,
   CalendarDaysIcon,
+  CursorArrowRaysIcon,
   LanguageIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
   PaintBrushIcon,
+  RectangleStackIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid';
 import fabric from 'fabric';
 import { FabricJSEditor } from 'fabricjs-react';
 import { saveAs } from 'file-saver';
-import { LineCapStyle, PDFDocument, rgb } from 'pdf-lib';
+import { LineCapStyle, PDFDocument, PDFPage, rgb } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { RGBColor } from 'react-color';
+import { useLocalStorage } from 'usehooks-ts';
 import UploadButton from '../components/UploadButton';
 import FabricPagePreview from '../PDFViewer/FabricPagePreview';
 import PagePreview from '../PDFViewer/PagePreview';
@@ -29,6 +32,137 @@ import ColorPickerButton, {
   DEFAULT_COLOR,
   rgbColorToCssRgba,
 } from '../ui/ColorPickerButton';
+import ImagePickerButton from '../ui/ImagePickerButton';
+
+export interface Signature {
+  svg: JSX.Element;
+  json: any;
+}
+
+export interface SerializedSignature {
+  image: string;
+  json: string[];
+}
+
+function offsetPath(path: any[][]) {
+  // Get the starting position of the path
+  const startX = path[0][1];
+  const startY = path[0][2];
+
+  // Create a new empty array to hold the offsetted path
+  const offsettedPath = [];
+
+  // Loop through the original path array
+  for (let i = 0; i < path.length; i++) {
+    const command = path[i];
+    // If the command is a moveto command, offset the starting position by the starting position of the original path
+    if (command[0] === 'M') {
+      offsettedPath.push([
+        command[0],
+        command[1] - startX,
+        command[2] - startY,
+      ]);
+    }
+    // If the command is a curve command, offset the control points and end point by the starting position of the original path
+    else {
+      offsettedPath.push([
+        command[0],
+        command[1] - startX,
+        command[2] - startY,
+        command[3] - startX,
+        command[4] - startY,
+      ]);
+    }
+  }
+
+  return offsettedPath;
+}
+
+function normalizePath(path: any[][]): any[][] {
+  // Calculate the top left corner of the path
+  let minX = Number.MAX_VALUE;
+  let minY = Number.MAX_VALUE;
+
+  for (const command of path) {
+    for (let i = 1; i < command.length; i += 2) {
+      const x = command[i];
+      const y = command[i + 1];
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+    }
+  }
+
+  // Translate the path so that it starts from the top left corner
+  const translatedPath: number[][] = [];
+  let currentX = minX;
+  let currentY = minY;
+
+  for (const command of path) {
+    const type = command[0];
+    const args = command.slice(1);
+    let newArgs: number[] = [];
+
+    switch (type) {
+      case 'M':
+        newArgs = [currentX - args[0], currentY - args[1]];
+        currentX = args[0];
+        currentY = args[1];
+        break;
+      case 'L':
+        newArgs = [currentX - args[0], currentY - args[1]];
+        currentX = args[0];
+        currentY = args[1];
+        break;
+      case 'H':
+        newArgs = [currentX - args[0]];
+        currentX = args[0];
+        break;
+      case 'V':
+        newArgs = [currentY - args[0]];
+        currentY = args[0];
+        break;
+      case 'C':
+        newArgs = [
+          currentX - args[0],
+          currentY - args[1],
+          currentX - args[2],
+          currentY - args[3],
+          args[4] - currentX,
+          args[5] - currentY,
+        ];
+        currentX = args[4];
+        currentY = args[5];
+        break;
+      case 'S':
+        newArgs = [
+          currentX - args[0],
+          currentY - args[1],
+          args[2] - currentX,
+          args[3] - currentY,
+        ];
+        currentX = args[2];
+        currentY = args[3];
+        break;
+      case 'Q':
+        newArgs = [
+          currentX - args[0],
+          currentY - args[1],
+          args[2] - currentX,
+          args[3] - currentY,
+        ];
+        currentX = args[2];
+        currentY = args[3];
+        break;
+      case 'T':
+        newArgs = [args[0] - currentX, args[1] - currentY];
+        currentX = args[0];
+        currentY = args[1];
+        break;
+    }
+    translatedPath.push([type, ...newArgs]);
+  }
+  return translatedPath;
+}
 
 async function createPDF(files: File[]) {
   const pdfDoc = await PDFDocument.create();
@@ -46,6 +180,69 @@ async function createPDF(files: File[]) {
   };
 }
 
+function drawObjectOnPage(
+  object: any,
+  page: PDFPage,
+  offsetLeft?: number,
+  offsetTop?: number
+) {
+  const fill = object.fill ? cssRgbaToRgbColor(object.fill) : DEFAULT_COLOR;
+  const stroke = object.stroke
+    ? cssRgbaToRgbColor(object.stroke)
+    : DEFAULT_COLOR;
+  switch (object.type) {
+    case 'group':
+      console.log('drawing group', { x: object.left, y: object.top });
+      object.objects.forEach((object: any) =>
+        drawObjectOnPage(object, page, object.left, object.top)
+      );
+      break;
+    // TODO: Maybe add more annotations tools (circle/rect...);
+    case 'text':
+    case 'textbox':
+      page.drawText(object.text, {
+        x: object.left,
+        // Offsetting by 4px to match between the two drawer
+        // because I can't figure out where the offset between
+        // Fabric canvas and the PDF canvas drawing.
+        // page.getHeight() is used here to transform the y location
+        // since PDF coordinate space top-bottom is 0,0 vs fabric canvas
+        // which has top-left 0,0
+        y: page.getHeight() - object.top - object.height + object.fontSize / 4,
+        lineHeight: 100 * object.lineHeight * object.fontSize,
+        color: rgb(fill.r / 255.0, fill.g / 255.0, fill.b / 255.0),
+        opacity: fill.a,
+        size: object.fontSize * object.scaleX,
+      });
+      break;
+    case 'path':
+      console.log(object);
+      page.moveTo(0, page.getHeight());
+      const xSign = Math.sign(object.path[0][1] - object.path[1][1]);
+      const ySign = Math.sign(object.path[0][2] - object.path[1][2]);
+      console.log({ xSign, ySign });
+      const offsetedPath = offsetPath(object.path);
+      console.log(offsetedPath);
+      const path = offsetedPath
+        .map((commandArr: (string | number)[]) => commandArr.join(' '))
+        .join(' ');
+      page.drawSvgPath(path, {
+        borderLineCap: LineCapStyle.Round,
+        borderColor: rgb(stroke.r / 255.0, stroke.g / 255.0, stroke.b / 255.0),
+        borderOpacity: stroke.a,
+        borderWidth: object.strokeWidth,
+        x:
+          object.left + (xSign > 0 ? object.width : 0) + object.strokeWidth / 2,
+        y:
+          page.getHeight() -
+          object.top -
+          (ySign > 0 ? object.height / 2 : 0) -
+          object.strokeWidth / 2,
+      });
+      break;
+  }
+}
+
 async function drawFabricObjectsOnAllPages(
   pdfDoc: PDFDocument,
   fabricObjects: { [index: number]: any }
@@ -58,51 +255,7 @@ async function drawFabricObjectsOnAllPages(
     newPdfDoc.addPage(page);
     const json = fabricObjects[index + 1];
     json?.objects.forEach((object: any) => {
-      const fill = object.fill ? cssRgbaToRgbColor(object.fill) : DEFAULT_COLOR;
-      const stroke = object.stroke
-        ? cssRgbaToRgbColor(object.stroke)
-        : DEFAULT_COLOR;
-      switch (object.type) {
-        // TODO: Maybe add more annotations tools (circle/rect...);
-        case 'text':
-        case 'textbox':
-          page.drawText(object.text, {
-            x: object.left,
-            // Offsetting by 4px to match between the two drawer
-            // because I can't figure out where the offset between
-            // Fabric canvas and the PDF canvas drawing.
-            // page.getHeight() is used here to transform the y location
-            // since PDF coordinate space top-bottom is 0,0 vs fabric canvas
-            // which has top-left 0,0
-            y:
-              page.getHeight() -
-              object.top -
-              object.height +
-              object.fontSize / 4,
-            lineHeight: 100 * object.lineHeight * object.fontSize,
-            color: rgb(fill.r / 255.0, fill.g / 255.0, fill.b / 255.0),
-            opacity: fill.a,
-            size: object.fontSize * object.scaleX,
-          });
-          break;
-        case 'path':
-          console.log(object);
-          page.moveTo(0, page.getHeight());
-          const path = object.path
-            .map((commandArr: (string | number)[]) => commandArr.join(' '))
-            .join(' ');
-          page.drawSvgPath(path, {
-            borderLineCap: LineCapStyle.Round,
-            borderColor: rgb(
-              stroke.r / 255.0,
-              stroke.g / 255.0,
-              stroke.b / 255.0
-            ),
-            borderOpacity: stroke.a,
-            borderWidth: object.strokeWidth,
-          });
-          break;
-      }
+      drawObjectOnPage(object, page);
     });
   });
 
@@ -143,10 +296,14 @@ const QuickSignPDF = (): JSX.Element => {
   const [pdf, setPDF] = useState<PDFDocumentProxy>();
   const [doc, setDoc] = useState<PDFDocument>();
   const [activePage, setActivePage] = useState<number>(1);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(1.5);
   const [isDrawingMode, setIsDrawingMode] = useState<boolean>(false);
   const [fontSize, setFontSize] = useState<number>(16);
   const [color, setColor] = useState<RGBColor>(DEFAULT_RGB_COLOR);
+  const [savedSignatures, setSavedSignatures] = useLocalStorage<
+    SerializedSignature[]
+  >('savedSignatures', []);
+
   // Tracks all pages drawables so we can burn them to the PDF once the user
   // click Sign & Download. This also allows humans to continue editing different
   // pages.
@@ -239,6 +396,7 @@ const QuickSignPDF = (): JSX.Element => {
     const editor = editorRef.current;
     if (!editor) return;
     function onMouseUp() {
+      console.log(editor?.canvas.getObjects());
       updatePageObjects();
     }
     editor.canvas.on('mouse:up', onMouseUp);
@@ -251,6 +409,37 @@ const QuickSignPDF = (): JSX.Element => {
       editor.canvas.off('mouse:up', onMouseUp);
     };
   }, [color, fontSize, isDrawingMode, updatePageObjects]);
+
+  const onSaveSelected = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const selectedObjects = editor.canvas.getActiveObjects();
+    if (!selectedObjects || selectedObjects.length === 0) return;
+
+    const json = selectedObjects.map((object: any) => object.toJSON());
+
+    // Group to get the preview data uri. Ungroup right away because there's a bug
+    // with Fabric where the selection box act wonky after grouping.
+    const selectedGroup = new fabric.fabric.Group(selectedObjects, {
+      originX: 'center',
+      originY: 'center',
+    });
+    const image = selectedGroup.toDataURL({
+      format: 'png',
+    });
+    selectedGroup.ungroupOnCanvas();
+
+    const selectedSignature = {
+      json,
+      image,
+    };
+
+    setSavedSignatures((savedSignatures) => [
+      ...savedSignatures,
+      selectedSignature,
+    ]);
+  }, [setSavedSignatures]);
 
   return (
     <div className="h-full flex flex-col">
@@ -265,7 +454,7 @@ const QuickSignPDF = (): JSX.Element => {
             <div className="flex flex-col flex-grow">
               {/* Toolbar */}
               <div className="flex items-center p-3">
-                <div className="h-10 w-48 mr-2">
+                <div className="h-10 w-48">
                   <UploadButton onDrop={onDrop} accept=".pdf" fullSized={false}>
                     <div className="flex items-center text-center">
                       <ArrowUpTrayIcon className="h-5 mr-2" />
@@ -273,6 +462,7 @@ const QuickSignPDF = (): JSX.Element => {
                     </div>
                   </UploadButton>
                 </div>
+                <div className="text-gray-200 text-xl mx-2"> | </div>
                 <div>
                   <select
                     className="border border-gray-100"
@@ -290,8 +480,15 @@ const QuickSignPDF = (): JSX.Element => {
                     color={color}
                   />
                 </div>
+                <div className="text-gray-200 text-xl mx-2"> | </div>
                 <button
-                  className=" text-gray-500 px-3 py-2  hover:text-green-700 mr-2"
+                  className=" text-gray-500 hover:text-green-700"
+                  onClick={() => setIsDrawingMode(false)}
+                >
+                  <CursorArrowRaysIcon className="w-5 mr-2" />
+                </button>
+                <button
+                  className="text-gray-500 py-2 hover:text-green-700"
                   onClick={() => {
                     if (!editorRef.current) return;
                     setIsDrawingMode(false);
@@ -312,7 +509,7 @@ const QuickSignPDF = (): JSX.Element => {
                   <LanguageIcon className="w-5" />
                 </button>
                 <button
-                  className=" text-gray-500 px-3 py-2  hover:text-green-700 mr-2"
+                  className="text-gray-500 mx-3 py-2 hover:text-green-700"
                   onClick={() => {
                     if (!editorRef.current) return;
                     setIsDrawingMode(false);
@@ -337,7 +534,7 @@ const QuickSignPDF = (): JSX.Element => {
                 </button>
 
                 <button
-                  className=" text-gray-500 px-1  hover:text-green-700 mr-2"
+                  className=" text-gray-500 hover:text-green-700"
                   onClick={() => {
                     if (!editorRef.current) return;
                     setIsDrawingMode((isDrawingMode) => !isDrawingMode);
@@ -349,26 +546,65 @@ const QuickSignPDF = (): JSX.Element => {
                     <PaintBrushIcon className="w-5" />
                   )}
                 </button>
+                <div className="text-gray-200 text-xl mx-2"> | </div>
                 <button
-                  className="flex  text-gray-500 px-1  hover:text-green-700 mr-2"
+                  className="flex  text-gray-500 items-center hover:text-green-700"
                   onClick={() => {
                     editorRef.current?.deleteAll();
                     updatePageObjects();
                   }}
                 >
-                  <TrashIcon className="w-5" />
+                  <TrashIcon className="w-5 mr-1" />
                   <span>All</span>
                 </button>
                 <button
-                  className="flex text-gray-500 px-1 hover:text-green-700 mr-2"
+                  className="flex text-gray-500 ml-2 items-center hover:text-green-700"
                   onClick={() => {
                     editorRef.current?.deleteSelected();
                     updatePageObjects();
                   }}
                 >
-                  <TrashIcon className="w-5" />
+                  <TrashIcon className="w-5 mr-1" />
                   <span>Selected</span>
                 </button>
+
+                <div className="text-gray-200 text-xl mx-2"> | </div>
+                <button
+                  className="flex text-gray-500 items-center hover:text-green-700"
+                  onClick={() => {
+                    onSaveSelected();
+                  }}
+                >
+                  <RectangleStackIcon className="w-5 mr-1" />
+                  <span>Save Selected</span>
+                </button>
+                <div className="text-gray-500 hover:text-green-700 ml-2">
+                  <ImagePickerButton
+                    showDelete={true}
+                    onDelete={(index: number) => {
+                      setSavedSignatures((savedSignatures) => {
+                        const newSignatures = [...savedSignatures];
+                        newSignatures.splice(index, 1);
+                        return newSignatures;
+                      });
+                    }}
+                    onPick={(index: number) => {
+                      const signatureToInsert = savedSignatures[index];
+                      const json = signatureToInsert.json;
+                      const prevObj = editorRef.current?.canvas.toObject();
+                      const newObj = {
+                        ...prevObj,
+                        objects: [...prevObj.objects, ...json],
+                      };
+                      editorRef.current?.canvas.loadFromJSON(newObj, () => {
+                        updatePageObjects();
+                      });
+                    }}
+                    images={savedSignatures.map(
+                      (s: SerializedSignature) => s.image
+                    )}
+                  />
+                </div>
 
                 <div className="flex-grow"></div>
                 <div className="flex items-center">
@@ -397,6 +633,8 @@ const QuickSignPDF = (): JSX.Element => {
                   >
                     <ArrowRightCircleIcon className="w-5" />
                   </button>
+                  <div className="text-gray-200 text-xl mx-2"> | </div>
+
                   <button
                     className="h-8 text-gray-500 px-1 hover:text-green-700"
                     onClick={() => setScale((scale) => scale / 1.2)}
