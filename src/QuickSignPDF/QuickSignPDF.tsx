@@ -414,21 +414,24 @@ const QuickSignPDF = (): JSX.Element => {
     const editor = editorRef.current;
     if (!editor) return;
 
+    if (!editor.canvas.getActiveObject()) return;
+
     const selectedObjects = editor.canvas.getActiveObjects();
     if (!selectedObjects || selectedObjects.length === 0) return;
 
+    editor.canvas.discardActiveObject();
     const json = selectedObjects.map((object: any) => object.toJSON());
 
-    // Group to get the preview data uri. Ungroup right away because there's a bug
-    // with Fabric where the selection box act wonky after grouping.
-    const selectedGroup = new fabric.fabric.Group(selectedObjects, {
-      originX: 'center',
-      originY: 'center',
-    });
+    const selectedGroup = new fabric.fabric.Group(selectedObjects);
     const image = selectedGroup.toDataURL({
       format: 'png',
     });
+
     selectedGroup.ungroupOnCanvas();
+    for (const selectedObj of selectedGroup.getObjects()) {
+      editor.canvas.remove(selectedObj);
+      editor.canvas.add(selectedObj);
+    }
 
     const selectedSignature = {
       json,
