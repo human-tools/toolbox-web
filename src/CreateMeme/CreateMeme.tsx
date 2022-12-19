@@ -5,6 +5,7 @@ import { fabric } from 'fabric'; // this also installed on your project
 import { useFabricJSEditor, FabricJSCanvas } from 'fabricjs-react';
 import { RGBColor } from 'react-color';
 import ColorPickerButton, { rgbColorToCssRgba } from '../ui/ColorPickerButton';
+import useCanvasKeyBindings from '../useCanvasKeybindings';
 
 const MEME_TEXT_SHADOW = new fabric.Shadow({
   color: 'black',
@@ -42,7 +43,7 @@ let wasImageLoadedToCanvas = false;
 
 const CreateMeme = (): JSX.Element => {
   const { editor, onReady } = useFabricJSEditor();
-  const [listenersLoaded, setListenersLoaded] = useState<boolean>(false);
+  useCanvasKeyBindings(editor);
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [originalImage, setOriginalImage] = useState<any>({});
   const [fontSize, setFontSize] = useState<number>(48);
@@ -91,34 +92,6 @@ const CreateMeme = (): JSX.Element => {
     };
   }, [allCaps, editor]);
 
-  useEffect(() => {
-    if (!editor || listenersLoaded) return;
-
-    function onKeyDown(options: any) {
-      if (options.repeat) return;
-
-      const key = options.key;
-      const isAKeyDown = key == 'a';
-      const isDKeyDown = key == 'd';
-      const shouldSelectAll =
-        (isAKeyDown && options.ctrlKey) || (isAKeyDown && options.metaKey);
-      const shouldDeselectAll =
-        (isDKeyDown && options.ctrlKey) || (isDKeyDown && options.metaKey);
-      const shouldDeleteSelected = key == 'Backspace';
-
-      if (shouldSelectAll) {
-        selectAllTextObjects();
-      } else if (shouldDeselectAll) {
-        deselectAllTextObjects();
-      } else if (shouldDeleteSelected) {
-        deleteSelectedObjects();
-      }
-    }
-
-    fabric.util.addListener(document.body, 'keydown', onKeyDown);
-    setListenersLoaded(true);
-  }, [editor, listenersLoaded]);
-
   const loadImageToCanvas = useCallback(
     (imagePath) => {
       editor?.deleteAll();
@@ -162,32 +135,6 @@ const CreateMeme = (): JSX.Element => {
     },
     [editor]
   );
-
-  const selectAllTextObjects = useCallback(() => {
-    if (!editor) return;
-    editor.canvas.discardActiveObject();
-    const sel = new fabric.ActiveSelection(
-      editor.canvas.getObjects().filter((obj) => obj.get('type') == 'textbox'),
-      {
-        canvas: editor?.canvas,
-      }
-    );
-    editor.canvas.setActiveObject(sel);
-    editor.canvas.requestRenderAll();
-  }, [editor]);
-
-  const deselectAllTextObjects = useCallback(() => {
-    if (!editor) return;
-    editor.canvas.discardActiveObject();
-    editor.canvas.requestRenderAll();
-  }, [editor]);
-
-  const deleteSelectedObjects = useCallback(() => {
-    if (!editor) return;
-    editor.canvas.getActiveObjects().map((obj) => editor.canvas.remove(obj));
-    editor.canvas.discardActiveObject();
-    editor.canvas.requestRenderAll();
-  }, [editor]);
 
   const applyRotateAndFlip = useCallback(
     (operation: string) => {
