@@ -10039,6 +10039,11 @@ react-error-overlay@^6.0.9:
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.9.tgz#3c743010c9359608c375ecd6bc76f35d93995b0a"
   integrity sha512-nQTTcUu+ATDbrSD1BZHr5kgSD4oF8OFjxun8uAaL8RwPBacGBNPf/yAuVVdx17N8XNzRDMrZ9XcKZHCjPW+9ew==
 
+react-hotkeys-hook@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/react-hotkeys-hook/-/react-hotkeys-hook-4.0.6.tgz#c1c14dde9803d0c2d84727e0b88e1a50af81dc8c"
+  integrity sha512-QYSGEuvhjrDs4JbcQ8hVGPTJe02HBmLFuibVsAZPT+rJVOLqc9FqMKL8KXdBf6YFRSN2vN8zXBxyKnTTh9DScA==
+
 react-image-crop@^10.0.9:
   version "10.0.9"
   resolved "https://registry.yarnpkg.com/react-image-crop/-/react-image-crop-10.0.9.tgz#94c65833d4e8ed16fe645227ff26915bba177359"
