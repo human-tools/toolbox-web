@@ -17,6 +17,8 @@ interface SlideshowConfig {
   isBlured: boolean;
   res: string;
   background: RGBColor;
+  durationPerPhoto: number;
+  padding: number;
 }
 
 const SLIDESHOW_COMMAND = [
@@ -65,11 +67,15 @@ const CreatePhotosSlideshow = (): JSX.Element => {
     isBlured: false,
     res: ASPECT_RATIOS['16:9'],
     background: DEFAULT_FRAME_COLOR,
+    durationPerPhoto: 1,
+    padding: 50,
   });
 
   const generateVideo = useCallback(async () => {
     if (orderedItems.length === 0 || isGenerating) return;
     setIsGenerating(true);
+    setVideoSrc(undefined);
+    setProgress(0);
 
     if (!ffmpeg.isLoaded()) {
       await ffmpeg.load();
@@ -83,7 +89,7 @@ const CreatePhotosSlideshow = (): JSX.Element => {
     for (let i = 0; i < orderedItems.length; i++) {
       const itemPosition = orderedItems[i] - 1;
       const fileName = getCleanName(files[itemPosition].name);
-      inputPaths.push(`file ${fileName}\nduration 1`);
+      inputPaths.push(`file ${fileName}\nduration ${config.durationPerPhoto}`);
       ffmpeg.FS('writeFile', fileName, await fetchFile(files[itemPosition]));
 
       // add the last file into the txt this is a quricky bug in ffmpeg
@@ -105,7 +111,8 @@ const CreatePhotosSlideshow = (): JSX.Element => {
       ffmpegRenderCommand.push('-filter_complex');
       ffmpegRenderCommand.push(`split [copy][original]; \ 
         [copy] scale=${config.res}:force_original_aspect_ratio=increase,boxblur=20,crop=${config.res}[blured]; \
-        [original] scale=${config.res}:force_original_aspect_ratio=decrease[scaled_original]; \ 
+        [original]format=rgba,pad=iw+${config.padding}:ih+${config.padding}:(ow-iw)/2:(oh-ih)/2:color=#00000000[padded]; \
+        [padded] scale=${config.res}:force_original_aspect_ratio=decrease[scaled_original]; \ 
         [blured][scaled_original]overlay=((main_w-overlay_w)/2):((main_h-overlay_h)/2)`);
     } else {
       ffmpegRenderCommand.push('-vf');
@@ -189,15 +196,6 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                 </UploadButton>
               </div>
               <div className="mr-2">
-                <ColorPickerButton
-                  disableAlpha={true}
-                  color={config.background}
-                  onChange={(color) =>
-                    setConfig({ ...config, background: color })
-                  }
-                />
-              </div>
-              <div className="mr-2">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
@@ -212,6 +210,65 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                   <span className="pl-2">Blur Background</span>
                 </label>
               </div>
+
+              {!config.isBlured && (
+                <div className="flex items-center">
+                  <div className="mr-2 text-gray-300"> | </div>
+
+                  <div className="mr-2">
+                    <ColorPickerButton
+                      disableAlpha={true}
+                      color={config.background}
+                      onChange={(color) =>
+                        setConfig({ ...config, background: color })
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+
+              {config.isBlured && (
+                <div className="flex items-center">
+                  <div className="mr-2 text-gray-300"> | </div>
+                  <div className="mr-2">
+                    <label className="flex items-center">
+                      <span className="pr-2">Slide Duration</span>
+                      <input
+                        type="number"
+                        value={config.durationPerPhoto}
+                        onChange={(e) =>
+                          setConfig(() => ({
+                            ...config,
+                            durationPerPhoto: parseFloat(
+                              (e.target as HTMLInputElement).value
+                            ),
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="mr-2 text-gray-300"> | </div>
+
+                  <div className="mr-2">
+                    <label className="flex items-center">
+                      <span className="pr-2">Photo Padding</span>
+                      <input
+                        type="number"
+                        value={config.padding}
+                        step={10}
+                        onChange={(e) =>
+                          setConfig(() => ({
+                            ...config,
+                            padding: parseFloat(
+                              (e.target as HTMLInputElement).value
+                            ),
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex flex-row">
               {/* Video */}
@@ -240,6 +297,14 @@ const CreatePhotosSlideshow = (): JSX.Element => {
                   autoPlay={true}
                   className="h-52 lg:h-96 lg:w-auto"
                 />
+                {videoSrc && (
+                  <button
+                    onClick={generateVideo}
+                    className="p-2 border-amber-300 border hover:bg-blue-500 hover:text-white"
+                  >
+                    <div>Re-generate Slideshow</div>
+                  </button>
+                )}
               </div>
 
               {/* Images */}
