@@ -11,7 +11,7 @@
     "fabric": "^5.2.4",
     "fabricjs-react": "1.0.8",
     "file-saver": "^2.0.5",
-    "jszip": "^3.6.0",
+    "jszip": "^3.8.0",
     "pdf-lib": "^1.16.0",
     "pdfjs-dist": "^2.6.347",
     "react": "^17.0.1",
