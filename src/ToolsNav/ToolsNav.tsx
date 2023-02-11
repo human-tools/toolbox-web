@@ -11,7 +11,7 @@ const ToolsNav = ({
   showHome = true,
   showTodo = true,
   className = 'mr-1 px-3 py-2 rounded-t bg-white bg-opacity-40 text-black text-opacity-20 hover:bg-opacity-90',
-  activeClassName = 'bg-opacity-100 text-opacity-100 font-bold',
+  activeClassName = 'bg-opacity-100 text-opacity-100 font-medium',
 }: ToolsNavProps): JSX.Element => {
   return (
     <>
