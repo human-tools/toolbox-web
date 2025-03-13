@@ -50,15 +50,11 @@ const CreatePhotosSlideshow = (): JSX.Element => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [images, setImages] = useState<ImageData[]>([]);
-  const {
-    orderedItems,
-    setItems,
-    setContainerRef,
-    addDraggableNodeRef,
-  } = useSortable<number>([], {
-    dragoverClassNames: ['border-green-200', 'border-opacity-100'],
-    draggingClassNames: ['opacity-10'],
-  });
+  const { orderedItems, setItems, setContainerRef, addDraggableNodeRef } =
+    useSortable<number>([], {
+      dragoverClassNames: ['border-green-200', 'border-opacity-100'],
+      draggingClassNames: ['opacity-10'],
+    });
 
   const [fileName, setFileName] = useState<string>(
     `photos-slideshow-${new Date().getTime()}.mp4`

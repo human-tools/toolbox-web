@@ -14,23 +14,7 @@ const MEME_TEXT_SHADOW = new fabric.Shadow({
 });
 
 const FONT_SIZES = [
-  1,
-  2,
-  4,
-  8,
-  12,
-  16,
-  24,
-  32,
-  36,
-  40,
-  48,
-  60,
-  64,
-  80,
-  96,
-  128,
-  160,
+  1, 2, 4, 8, 12, 16, 24, 32, 36, 40, 48, 60, 64, 80, 96, 128, 160,
 ];
 
 const DEFAULT_RGB_COLOR = {

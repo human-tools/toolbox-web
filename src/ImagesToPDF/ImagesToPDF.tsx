@@ -67,10 +67,11 @@ const GeneratePDFFromImages = (): JSX.Element => {
   const onDrop = useCallback(
     async (files) => {
       const oldPagesCount = doc?.getPageCount() || 0;
-      const { bytes, pageCount, doc: newPdfDoc } = await generatePDF(
-        files,
-        doc
-      );
+      const {
+        bytes,
+        pageCount,
+        doc: newPdfDoc,
+      } = await generatePDF(files, doc);
 
       // Calculate new page order with the added pages at the end of the order.
       // To avoid losing previously ordered indexes.

@@ -75,7 +75,7 @@
     "eslint": "^7.20.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-react-hooks": "^5.2.0-canary-f457d0b4-20250313",
     "husky": "^5.0.9",
     "lint-staged": "^10.5.4",
     "postcss": "^8.2.6",
