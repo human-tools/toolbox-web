@@ -1,3 +1,4 @@
+import { saveAs } from 'file-saver';
 import { PhotoIcon } from '@heroicons/react/24/solid';
 import JSZip from 'jszip';
 import { doc } from 'prettier';

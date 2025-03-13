@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist/types/display/api';
-import { PageViewport } from 'pdfjs-dist/types/display/display_utils';
+import { PDFDocumentProxy, PDFPageProxy } from '../../node_modules/pdfjs-dist/types/src/display/api'
+import { PageViewport } from '../../node_modules/pdfjs-dist/types/src/display/display_utils';
 
 interface Props {
   data: Uint8Array;

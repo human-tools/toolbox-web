@@ -20,7 +20,7 @@ import { FabricJSEditor } from 'fabricjs-react';
 import { saveAs } from 'file-saver';
 import { LineCapStyle, PDFDocument, PDFPage, rgb } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
+import { PDFDocumentProxy } from '../../node_modules/pdfjs-dist/types/src/display/api';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { RGBColor } from 'react-color';
 import { useLocalStorage } from 'usehooks-ts';

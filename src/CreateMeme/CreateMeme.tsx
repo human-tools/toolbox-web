@@ -6,6 +6,7 @@ import { useFabricJSEditor, FabricJSCanvas } from 'fabricjs-react';
 import { RGBColor } from 'react-color';
 import ColorPickerButton, { rgbColorToCssRgba } from '../ui/ColorPickerButton';
 import useCanvasKeyBindings from '../useCanvasKeybindings';
+import { saveAs } from 'file-saver';
 
 const MEME_TEXT_SHADOW = new fabric.Shadow({
   color: 'black',

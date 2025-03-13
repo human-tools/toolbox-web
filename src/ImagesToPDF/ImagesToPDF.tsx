@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 import { PDFDocument, PDFImage } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import { getDocument } from 'pdfjs-dist';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
+import { PDFDocumentProxy } from '../../node_modules/pdfjs-dist/types/src/display/api';
 import PagePreview from '../PDFViewer/PagePreview';
 import { useSortable } from '@human-tools/use-sortable';
 import UploadButton from '../components/UploadButton';

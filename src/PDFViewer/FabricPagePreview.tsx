@@ -4,8 +4,8 @@ import {
   useFabricJSEditor,
 } from 'fabricjs-react';
 import { GlobalWorkerOptions } from 'pdfjs-dist';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
-import { PageViewport } from 'pdfjs-dist/types/display/display_utils';
+import { PDFDocumentProxy } from '../../node_modules/pdfjs-dist/types/src/display/api';
+import { PageViewport } from '../../node_modules/pdfjs-dist/types/src/display/display_utils';
 import {
   forwardRef,
   useCallback,

@@ -8178,9 +8178,16 @@ pdf-lib@^1.17.1:
     pako "^1.0.11"
     tslib "^1.11.1"
 
-pdfjs-dist@*, pdfjs-dist@^4.10.38:
+pdfjs-dist@*:
   version "4.10.38"
   resolved "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-4.10.38.tgz"
+  integrity sha512-/Y3fcFrXEAsMjJXeL9J8+ZG9U01LbuWaYypvDW2ycW1jL269L3js3DVBjDJ0Up9Np1uqDXsDrRihHANhZOlwdQ==
+  optionalDependencies:
+    "@napi-rs/canvas" "^0.1.65"
+
+pdfjs-dist@^4.10.38:
+  version "4.10.38"
+  resolved "https://registry.yarnpkg.com/pdfjs-dist/-/pdfjs-dist-4.10.38.tgz#3ee698003790dc266cc8b55c0e662ccb9ae18f53"
   integrity sha512-/Y3fcFrXEAsMjJXeL9J8+ZG9U01LbuWaYypvDW2ycW1jL269L3js3DVBjDJ0Up9Np1uqDXsDrRihHANhZOlwdQ==
   optionalDependencies:
     "@napi-rs/canvas" "^0.1.65"

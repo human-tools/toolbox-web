@@ -8,7 +8,7 @@ import { useSortable } from '@human-tools/use-sortable';
 import { saveAs } from 'file-saver';
 import { PDFDocument } from 'pdf-lib';
 import { getDocument } from 'pdfjs-dist';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api';
+import { PDFDocumentProxy } from '../../node_modules/pdfjs-dist/types/src/display/api';
 import { useCallback, useState } from 'react';
 import UploadButton from '../components/UploadButton';
 import PagePreview from '../PDFViewer/PagePreview';
