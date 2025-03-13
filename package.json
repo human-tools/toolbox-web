@@ -7,6 +7,7 @@
     "@heroicons/react": "^2.0.13",
     "@human-tools/use-sortable": "^0.0.5",
     "@tailwindcss/forms": "^0.2.1",
+    "canvas": "^3.1.0",
     "exif-auto-rotate": "^0.2.0",
     "fabric": "^5.2.4",
     "fabricjs-react": "1.0.8",
