@@ -6,7 +6,7 @@ const Home = (): JSX.Element => {
       <article className="flex flex-col lg:flex-row lg:flex-row-reverse	lg:justify-end lg:items-center lg:px-10">
         <div className="lg:text-xl 2xl:text-xl">
           <section className="mb-4 lg:mb-8">
-            <h1 className="text-2xl font-medium lg:text-5xl my-10">
+            <h1 className="text-2xl font-medium lg:text-6xl my-8 font-bold">
               Human Tools
             </h1>
             <p className="font-light">
@@ -16,7 +16,7 @@ const Home = (): JSX.Element => {
             <div className="my-10 flex flex-wrap">
               <ToolsNav
                 showHome={false}
-                className="font-light inline-flex w-60 h-20 items-center justify-center text-xs p-10 shadow rounded-lg text-center lg:text-xl lg:p-2 lg:m-2 bg-gradient-to-r hover:from-gray-100 hover:to-cian-500"
+                className="font-light inline-flex w-60 h-20 items-center justify-center text-xs p-10 shadow rounded-lg text-center lg:text-xl lg:p-2 lg:m-2 lg:w-72 lg:h-24 lg:shadow-lg hover:shadow-xl"
                 activeClassName=""
               />
             </div>
@@ -36,7 +36,7 @@ const Home = (): JSX.Element => {
             <p className="font-extralight">
               Feel free to get in touch on{' '}
               <a
-                className="underline"
+                className="underline font-light hover:text-blue-700"
                 href="https://github.com/human-tools"
                 target="_blank"
               >
@@ -50,7 +50,7 @@ const Home = (): JSX.Element => {
             <ul className="list-disc ml-10 font-extralight">
               <li>
                 <a
-                  className="underline"
+                  className="underline font-light hover:text-blue-700"
                   href="https://absurd.design/"
                   target="_blank"
                 >
